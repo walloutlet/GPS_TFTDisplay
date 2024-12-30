@@ -6,6 +6,7 @@
 #include "config.h"
 
 #define DRAW_BUF_SIZE (SCREEN_WIDTH * SCREEN_HEIGHT / 10 * (LV_COLOR_DEPTH / 16))
+
 uint32_t draw_buf[DRAW_BUF_SIZE / 4];
 
 TinyGPSPlus gps;                                         // Initialize the GPS object
@@ -67,7 +68,7 @@ void printTextGPSData_Serial(TinyGPSPlus gps) {
   Serial.print(gps.altitude.meters());
   Serial.println(" meters");
   Serial.print("Speed: ");
-  Serial.print(gps.speed.mph());
+  Serial.print((int)gps.speed.mph());
   Serial.println(" mph");
   Serial.print("Course: ");
   Serial.println(gps.course.deg());
@@ -123,6 +124,31 @@ const char* directionHeading(TinyGPSPlus gps) {
   return directions[index];
 }
 
+void IRAM_ATTR onTimer() {
+    lv_tick_inc(1); // Increment LVGL's tick by 1ms
+}
+
+int counter() {
+    static int count = 0;
+    static bool increasing = true;
+
+    if (increasing) {
+        if (count < 140) {
+            return count++;
+        } else {
+            increasing = false;
+            return count;
+        }
+    } else {
+        if (count > 0) {
+            return count--;
+        } else {
+            increasing = true;
+            return count;
+        }
+    }
+}
+
 void setup() {
   Serial.begin(DEBUG_BAUDRATE);
   Serial2.begin(GPS_BAUDRATE);
@@ -140,9 +166,9 @@ void setup() {
   lv_tick_set_cb(lvgl_tick);
 
   // Register print function for debugging
-  #if LV_USE_LOG != 0
-    lv_log_register_print_cb( lv_print_logs );
-  #endif
+//  #if LV_USE_LOG != 0
+//    lv_log_register_print_cb( lv_print_logs );
+//  #endif
 
   lv_display_t * disp;
   disp = lv_tft_espi_create(SCREEN_WIDTH, SCREEN_HEIGHT, draw_buf, sizeof(draw_buf));
@@ -162,41 +188,54 @@ void loop() {
 
   // Let the LVGL GUI do its work and run every 5 ms
   lv_timer_handler();
-  delay(5);
+//  delay(5);
 
   // Read data from the GPS module using TinyGPSPlus
+//  Serial.print("Serial2 bytes available: ");
+//  Serial.println(Serial2.available());
   while (Serial2.available() > 0) {
     gps.encode(Serial2.read());
   }
 
   // Output the GPS data to the Serial Monitor
-  // printTextGPSData_Serial(gps);
+//  printTextGPSData_Serial(gps);
 
   // Output the GPS data to the TFT display
   // printTextGPSData_TFT(gps);
 
   // Format the time string into 24 hour clock and US date format
+  int adjustedHour = gps.time.hour() + TZ_OFFSET;
+  if (adjustedHour < 0) {
+      adjustedHour += 24;
+  }
   snprintf(dateBuffer, sizeof(dateBuffer), "%02d/%02d/%04d", gps.date.month(), gps.date.day(), gps.date.year());
-  snprintf(timeBuffer, sizeof(timeBuffer), "%02d:%02d:%02d", gps.time.hour(), gps.time.minute(), gps.time.second());
+  snprintf(timeBuffer, sizeof(timeBuffer), "%02d:%02d:%02d", adjustedHour, gps.time.minute(), gps.time.second());
+//  snprintf(timeBuffer, sizeof(timeBuffer), "%02d:%02d", adjustedHour, gps.time.minute());
 
-  lv_label_set_text(ui_labelDate, dateBuffer);
-  lv_label_set_text(ui_labelTime, timeBuffer);
-
-  static char bufSats[16];
-  std::snprintf(bufSats, sizeof(bufSats), "%d", (int)gps.satellites.value());
-  lv_label_set_text(ui_labelSats, bufSats);
+  lv_label_set_text(ui_Date, dateBuffer);
+  lv_label_set_text(ui_Time, timeBuffer);
 
   if(gps.sentencesWithFix() > 4) {
-    lv_obj_set_style_bg_color(ui_textSpeed, lv_color_hex(0x009427), LV_PART_MAIN);
-    lv_obj_set_style_bg_color(ui_textHeading, lv_color_hex(0x009427), LV_PART_MAIN);
-    lv_obj_set_style_bg_color(ui_labelSats, lv_color_hex(0x323136), LV_PART_MAIN);
+    lv_obj_clear_flag(ui_SatImg, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_clear_flag(ui_SatNumBackGround, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_clear_flag(ui_SatNum, LV_OBJ_FLAG_HIDDEN);
+//    lv_obj_set_style_bg_color(ui_textSpeed, lv_color_hex(0x009427), LV_PART_MAIN);
+//    lv_obj_set_style_bg_color(ui_textHeading, lv_color_hex(0x009427), LV_PART_MAIN);
+//    lv_obj_set_style_bg_color(ui_labelSats, lv_color_hex(0x323136), LV_PART_MAIN);
   } 
 
-  static char bufSpeed[16];
-  std::snprintf(bufSpeed, sizeof(bufSpeed), "%d", (int)gps.speed.mph());
-  lv_label_set_text(ui_labelSpeed, bufSpeed);
+  static char bufSats[16];
+  std::snprintf(bufSats, sizeof(bufSats), "%02d", (int)gps.satellites.value());
+  lv_label_set_text(ui_SatNum, bufSats);
 
-  lv_label_set_text(ui_labelHeading, directionHeading(gps));
+  static char bufSpeed[16];
+  std::snprintf(bufSpeed, sizeof(bufSpeed), "%03d", (int)gps.speed.mph());
+//  std::snprintf(bufSpeed, sizeof(bufSpeed), "%03d", counter());
+  lv_label_set_text(ui_SpeedNum, bufSpeed);
+  lv_arc_set_value(ui_SpeedArc, (int)gps.speed.mph());
+//  lv_arc_set_value(ui_SpeedArc, counter());
+
+  lv_label_set_text(ui_Heading, directionHeading(gps));
 
   // Set refresh rate
   delay(REFRESH_RATE);
