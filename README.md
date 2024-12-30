@@ -8,6 +8,6 @@ Development Environment: VS Code - PlatformIO
 - [WaveShare LC76G](https://www.waveshare.com/lc76g-gnss-module.htm)
 
 ## Library Dependancies:
-  - mikalhart/TinyGPSPlus @ ^1.1.0
+  - tinyu-zhao/TinyGPSPlus-ESP32@^0.0.2
   - bodmer/TFT_eSPI @ ^2.5.43
   - lvgl/lvgl @ ^9.2.2
