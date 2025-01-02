@@ -43,6 +43,8 @@ extern lv_obj_t * ui_SpeedChart;
 extern lv_obj_t * ui_SpeedChart_Xaxis;
 extern lv_obj_t * ui_SpeedChart_Yaxis1;
 extern lv_obj_t * ui_SpeedChart_Yaxis2;
+extern lv_chart_series_t * ui_SpeedChart_series_1;
+extern lv_chart_series_t * ui_SpeedChart_series_2;
 // CUSTOM VARIABLES
 
 // EVENTS

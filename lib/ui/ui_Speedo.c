@@ -63,7 +63,7 @@ void ui_Speedo_screen_init(void)
     lv_obj_set_x(ui_Time, 0);
     lv_obj_set_y(ui_Time, 100);
     lv_obj_set_align(ui_Time, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Time, "88:88:88");
+    lv_label_set_text(ui_Time, "--:--:--");
     lv_obj_remove_flag(ui_Time, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
                        LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
                        LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
@@ -92,7 +92,7 @@ void ui_Speedo_screen_init(void)
     lv_obj_set_x(ui_Date, 0);
     lv_obj_set_y(ui_Date, 80);
     lv_obj_set_align(ui_Date, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Date, "8888/88/88");
+    lv_label_set_text(ui_Date, "----/--/--");
     lv_obj_remove_flag(ui_Date, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
                        LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
                        LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
@@ -221,11 +221,11 @@ void ui_Speedo_screen_init(void)
     lv_scale_set_total_tick_count(ui_SpeedChart_Yaxis2, (0 > 0 ? 0 - 1 : 0) * 0 + 1);
     lv_scale_set_major_tick_every(ui_SpeedChart_Yaxis2, 0 >= 1 ? 0 : 1);
     lv_scale_set_label_show(ui_SpeedChart_Yaxis2, false);
-    lv_chart_series_t * ui_SpeedChart_series_1 = lv_chart_add_series(ui_SpeedChart, lv_color_hex(0x34BE04),
+    ui_SpeedChart_series_1 = lv_chart_add_series(ui_SpeedChart, lv_color_hex(0x34BE04),
                                                                      LV_CHART_AXIS_PRIMARY_Y);
     static lv_coord_t ui_SpeedChart_series_1_array[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     lv_chart_set_ext_y_array(ui_SpeedChart, ui_SpeedChart_series_1, ui_SpeedChart_series_1_array);
-    lv_chart_series_t * ui_SpeedChart_series_2 = lv_chart_add_series(ui_SpeedChart, lv_color_hex(0x9100ED),
+    ui_SpeedChart_series_2 = lv_chart_add_series(ui_SpeedChart, lv_color_hex(0x9100ED),
                                                                      LV_CHART_AXIS_SECONDARY_Y);
     static lv_coord_t ui_SpeedChart_series_2_array[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     lv_chart_set_ext_y_array(ui_SpeedChart, ui_SpeedChart_series_2, ui_SpeedChart_series_2_array);
