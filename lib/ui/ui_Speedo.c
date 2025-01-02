@@ -13,28 +13,11 @@ void ui_Speedo_screen_init(void)
     lv_obj_set_style_bg_color(ui_Speedo, lv_color_hex(0x282828), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_Speedo, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_SpeedArc = lv_arc_create(ui_Speedo);
-    lv_obj_set_width(ui_SpeedArc, 230);
-    lv_obj_set_height(ui_SpeedArc, 230);
-    lv_obj_set_align(ui_SpeedArc, LV_ALIGN_CENTER);
-    lv_obj_remove_flag(ui_SpeedArc, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
-                       LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC |
-                       LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
-    lv_arc_set_range(ui_SpeedArc, 0, 140);
-    lv_arc_set_value(ui_SpeedArc, 70);
-    lv_arc_set_bg_angles(ui_SpeedArc, 180, 0);
-
-    lv_obj_set_style_arc_color(ui_SpeedArc, lv_color_hex(0xC42F00), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_arc_opa(ui_SpeedArc, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-
-    lv_obj_set_style_bg_color(ui_SpeedArc, lv_color_hex(0xC42F00), LV_PART_KNOB | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_SpeedArc, 0, LV_PART_KNOB | LV_STATE_DEFAULT);
-
     ui_SpeedNumBackGround = lv_label_create(ui_Speedo);
     lv_obj_set_width(ui_SpeedNumBackGround, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_SpeedNumBackGround, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_SpeedNumBackGround, 0);
-    lv_obj_set_y(ui_SpeedNumBackGround, -50);
+    lv_obj_set_y(ui_SpeedNumBackGround, -70);
     lv_obj_set_align(ui_SpeedNumBackGround, LV_ALIGN_CENTER);
     lv_label_set_text(ui_SpeedNumBackGround, "888");
     lv_obj_remove_flag(ui_SpeedNumBackGround,
@@ -49,7 +32,7 @@ void ui_Speedo_screen_init(void)
     lv_obj_set_width(ui_SpeedNum, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_SpeedNum, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_SpeedNum, 0);
-    lv_obj_set_y(ui_SpeedNum, -50);
+    lv_obj_set_y(ui_SpeedNum, -70);
     lv_obj_set_align(ui_SpeedNum, LV_ALIGN_CENTER);
     lv_label_set_text(ui_SpeedNum, "888");
     lv_obj_remove_flag(ui_SpeedNum, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
@@ -120,9 +103,9 @@ void ui_Speedo_screen_init(void)
     ui_LabelMPH = lv_label_create(ui_Speedo);
     lv_obj_set_width(ui_LabelMPH, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_LabelMPH, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_LabelMPH, 68);
-    lv_obj_set_y(ui_LabelMPH, -32);
-    lv_obj_set_align(ui_LabelMPH, LV_ALIGN_CENTER);
+    lv_obj_set_x(ui_LabelMPH, 171);
+    lv_obj_set_y(ui_LabelMPH, -51);
+    lv_obj_set_align(ui_LabelMPH, LV_ALIGN_LEFT_MID);
     lv_label_set_text(ui_LabelMPH, "MPH");
     lv_obj_remove_flag(ui_LabelMPH, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
                        LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
@@ -134,10 +117,9 @@ void ui_Speedo_screen_init(void)
     lv_image_set_src(ui_SatImg, &ui_img_1946256235);
     lv_obj_set_width(ui_SatImg, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_SatImg, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_SatImg, 68);
-    lv_obj_set_y(ui_SatImg, -10);
+    lv_obj_set_x(ui_SatImg, -90);
+    lv_obj_set_y(ui_SatImg, -39);
     lv_obj_set_align(ui_SatImg, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_SatImg, LV_OBJ_FLAG_HIDDEN);     /// Flags
     lv_obj_remove_flag(ui_SatImg, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
                        LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
                        LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
@@ -145,11 +127,10 @@ void ui_Speedo_screen_init(void)
     ui_SatNumBackGround = lv_label_create(ui_Speedo);
     lv_obj_set_width(ui_SatNumBackGround, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_SatNumBackGround, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_SatNumBackGround, 84);
-    lv_obj_set_y(ui_SatNumBackGround, -1);
+    lv_obj_set_x(ui_SatNumBackGround, -75);
+    lv_obj_set_y(ui_SatNumBackGround, -30);
     lv_obj_set_align(ui_SatNumBackGround, LV_ALIGN_CENTER);
     lv_label_set_text(ui_SatNumBackGround, "88");
-    lv_obj_add_flag(ui_SatNumBackGround, LV_OBJ_FLAG_HIDDEN);     /// Flags
     lv_obj_remove_flag(ui_SatNumBackGround,
                        LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE |
                        LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
@@ -161,11 +142,10 @@ void ui_Speedo_screen_init(void)
     ui_SatNum = lv_label_create(ui_Speedo);
     lv_obj_set_width(ui_SatNum, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_SatNum, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_SatNum, 84);
-    lv_obj_set_y(ui_SatNum, -1);
+    lv_obj_set_x(ui_SatNum, -75);
+    lv_obj_set_y(ui_SatNum, -30);
     lv_obj_set_align(ui_SatNum, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_SatNum, "05");
-    lv_obj_add_flag(ui_SatNum, LV_OBJ_FLAG_HIDDEN);     /// Flags
+    lv_label_set_text(ui_SatNum, "88");
     lv_obj_remove_flag(ui_SatNum, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
                        LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
                        LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
@@ -176,14 +156,85 @@ void ui_Speedo_screen_init(void)
     ui_Heading = lv_label_create(ui_Speedo);
     lv_obj_set_width(ui_Heading, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Heading, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Heading, 171);
-    lv_obj_set_y(ui_Heading, -45);
-    lv_obj_set_align(ui_Heading, LV_ALIGN_LEFT_MID);
-    lv_label_set_text(ui_Heading, "WNW");
+    lv_obj_set_x(ui_Heading, 0);
+    lv_obj_set_y(ui_Heading, -33);
+    lv_obj_set_align(ui_Heading, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Heading, "---");
     lv_obj_remove_flag(ui_Heading, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
                        LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
                        LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
     lv_obj_set_style_text_font(ui_Heading, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    ui_SpeedChart = lv_chart_create(ui_Speedo);
+    lv_obj_set_width(ui_SpeedChart, 186);
+    lv_obj_set_height(ui_SpeedChart, 80);
+    lv_obj_set_x(ui_SpeedChart, 6);
+    lv_obj_set_y(ui_SpeedChart, 20);
+    lv_obj_set_align(ui_SpeedChart, LV_ALIGN_CENTER);
+    lv_obj_remove_flag(ui_SpeedChart, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
+                       LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE);     /// Flags
+    lv_obj_add_flag(ui_SpeedChart, LV_OBJ_FLAG_OVERFLOW_VISIBLE);      //make scales visible - Should it be forced to True?
+    //lv_obj_remove_flag( ui_SpeedChart, LV_OBJ_FLAG_SCROLLABLE );    //no chart-zoom in LVGL9 - Shouldn't it be forced to False?
+    lv_chart_set_type(ui_SpeedChart, LV_CHART_TYPE_LINE);
+    lv_chart_set_point_count(ui_SpeedChart, 64);
+    lv_chart_set_range(ui_SpeedChart, LV_CHART_AXIS_PRIMARY_Y, 0, 120);
+    lv_chart_set_range(ui_SpeedChart, LV_CHART_AXIS_SECONDARY_Y, 0, 120);
+
+    ui_SpeedChart_Xaxis = lv_scale_create(ui_SpeedChart);
+    lv_scale_set_mode(ui_SpeedChart_Xaxis, LV_SCALE_MODE_HORIZONTAL_BOTTOM);
+    lv_obj_set_size(ui_SpeedChart_Xaxis, lv_pct(100), 50);
+    lv_obj_set_align(ui_SpeedChart_Xaxis, LV_ALIGN_BOTTOM_MID);
+    lv_obj_set_y(ui_SpeedChart_Xaxis, 50 + lv_obj_get_style_pad_bottom(ui_SpeedChart,
+                                                                       LV_PART_MAIN) + lv_obj_get_style_border_width(ui_SpeedChart, LV_PART_MAIN));
+    lv_obj_set_style_line_width(ui_SpeedChart_Xaxis, 0, LV_PART_MAIN);
+    lv_obj_set_style_line_width(ui_SpeedChart_Xaxis, 1, LV_PART_ITEMS);   //LVGL-9.1 ticks are thicker by default
+    lv_obj_set_style_line_width(ui_SpeedChart_Xaxis, 1, LV_PART_INDICATOR);
+    lv_obj_set_style_length(ui_SpeedChart_Xaxis, 3, LV_PART_ITEMS);      //minor tick length
+    lv_obj_set_style_length(ui_SpeedChart_Xaxis, 6, LV_PART_INDICATOR);      //major tick length
+    lv_scale_set_range(ui_SpeedChart_Xaxis, 0, 10 > 0 ? 10 - 1 : 0);
+    lv_scale_set_total_tick_count(ui_SpeedChart_Xaxis, (10 > 0 ? 10 - 1 : 0) * 0 + 1);
+    lv_scale_set_major_tick_every(ui_SpeedChart_Xaxis, 0 >= 1 ? 0 : 1);
+    lv_scale_set_label_show(ui_SpeedChart_Xaxis, false);
+    ui_SpeedChart_Yaxis1 = lv_scale_create(ui_SpeedChart);
+    lv_scale_set_mode(ui_SpeedChart_Yaxis1, LV_SCALE_MODE_VERTICAL_LEFT);
+    lv_obj_set_size(ui_SpeedChart_Yaxis1, 10, lv_pct(100));
+    lv_obj_set_align(ui_SpeedChart_Yaxis1, LV_ALIGN_LEFT_MID);
+    lv_obj_set_x(ui_SpeedChart_Yaxis1, -10 - lv_obj_get_style_pad_left(ui_SpeedChart,
+                                                                       LV_PART_MAIN) - lv_obj_get_style_border_width(ui_SpeedChart, LV_PART_MAIN) + 2);
+    lv_obj_set_style_line_width(ui_SpeedChart_Yaxis1, 0, LV_PART_MAIN);
+    lv_obj_set_style_line_width(ui_SpeedChart_Yaxis1, 1, LV_PART_ITEMS);
+    lv_obj_set_style_line_width(ui_SpeedChart_Yaxis1, 1, LV_PART_INDICATOR);
+    lv_obj_set_style_length(ui_SpeedChart_Yaxis1, 5, LV_PART_ITEMS);   //minor tick length
+    lv_obj_set_style_length(ui_SpeedChart_Yaxis1, 2, LV_PART_INDICATOR);   //major tick length
+    lv_scale_set_range(ui_SpeedChart_Yaxis1,  0, 120);
+    lv_scale_set_total_tick_count(ui_SpeedChart_Yaxis1, (5 > 0 ? 5 - 1 : 0) * 1 + 1);
+    lv_scale_set_major_tick_every(ui_SpeedChart_Yaxis1, 1 >= 1 ? 1 : 1);
+    ui_SpeedChart_Yaxis2 = lv_scale_create(ui_SpeedChart);
+    lv_scale_set_mode(ui_SpeedChart_Yaxis2, LV_SCALE_MODE_VERTICAL_RIGHT);
+    lv_obj_set_align(ui_SpeedChart_Yaxis2, LV_ALIGN_RIGHT_MID);
+    lv_obj_set_style_line_width(ui_SpeedChart_Yaxis2, 0, LV_PART_MAIN);
+    lv_obj_set_style_line_width(ui_SpeedChart_Yaxis2, 1, LV_PART_ITEMS);
+    lv_obj_set_style_line_width(ui_SpeedChart_Yaxis2, 1, LV_PART_INDICATOR);
+    lv_obj_set_style_length(ui_SpeedChart_Yaxis2, 0, LV_PART_ITEMS);   //minor tick length
+    lv_obj_set_style_length(ui_SpeedChart_Yaxis2, 0, LV_PART_INDICATOR);   //major tick length
+    lv_scale_set_range(ui_SpeedChart_Yaxis2,  0, 120);
+    lv_scale_set_total_tick_count(ui_SpeedChart_Yaxis2, (0 > 0 ? 0 - 1 : 0) * 0 + 1);
+    lv_scale_set_major_tick_every(ui_SpeedChart_Yaxis2, 0 >= 1 ? 0 : 1);
+    lv_scale_set_label_show(ui_SpeedChart_Yaxis2, false);
+    lv_chart_series_t * ui_SpeedChart_series_1 = lv_chart_add_series(ui_SpeedChart, lv_color_hex(0x34BE04),
+                                                                     LV_CHART_AXIS_PRIMARY_Y);
+    static lv_coord_t ui_SpeedChart_series_1_array[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    lv_chart_set_ext_y_array(ui_SpeedChart, ui_SpeedChart_series_1, ui_SpeedChart_series_1_array);
+    lv_chart_series_t * ui_SpeedChart_series_2 = lv_chart_add_series(ui_SpeedChart, lv_color_hex(0x9100ED),
+                                                                     LV_CHART_AXIS_SECONDARY_Y);
+    static lv_coord_t ui_SpeedChart_series_2_array[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    lv_chart_set_ext_y_array(ui_SpeedChart, ui_SpeedChart_series_2, ui_SpeedChart_series_2_array);
+
+    lv_obj_set_style_size(ui_SpeedChart, 0, 0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+
+    //This workaround (an invisible outline) is needed because without it chart overflow-visible doesn't work in LVGL-9.1
+    lv_obj_set_style_outline_pad(ui_SpeedChart, LV_MAX3(50, 10, 0),
+                                 LV_PART_MAIN | LV_STATE_DEFAULT);   //workaround for ineffective 'overflow visible' flag
+    lv_obj_set_style_outline_width(ui_SpeedChart, -1, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 }

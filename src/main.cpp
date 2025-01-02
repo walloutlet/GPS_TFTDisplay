@@ -1,4 +1,6 @@
 #include <Arduino.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 #include <TinyGPSPlus.h>
 #include <TFT_eSPI.h>
 #include <lvgl.h>
@@ -9,8 +11,25 @@
 
 uint32_t draw_buf[DRAW_BUF_SIZE / 4];
 
+// Structure to hold GPS data
+struct GPSData {
+    float speed;
+    float latitude;
+    float longitude;
+    int sats;
+    int year;
+    int month;
+    int day;
+    int hour;
+    int minute;
+    int second;
+};
+
+GPSData gpsData;
 TinyGPSPlus gps;                                         // Initialize the GPS object
 TFT_eSPI tft = TFT_eSPI();                               // Initialize the TFT display object
+
+bool satFix = false;
 
 #if LV_USE_LOG != 0
 void lv_print_logs( lv_log_level_t level, const char * buf )
@@ -45,6 +64,39 @@ void display_flush(lv_display_t *disp, const lv_area_t *area, lv_color_t *color_
 
 static uint32_t lvgl_tick(void) {
     return millis();
+}
+
+// Task function to read GPS data
+void gpsReaderTask(void *pvParameters) {
+    for (;;) {
+        while (Serial2.available()) {
+            gps.encode(Serial2.read());
+        }
+        
+        // Update GPS data structure
+        if (gps.satellites.isValid()) {
+            gpsData.sats = gps.satellites.value();
+        }
+        if (gps.speed.isValid()) {
+            gpsData.speed = gps.speed.mph();
+        }
+        if (gps.location.isValid()) {
+            gpsData.latitude = gps.location.lat();
+            gpsData.longitude = gps.location.lng();
+        }
+        if (gps.date.isValid()) {
+            gpsData.year = gps.date.year();
+            gpsData.month = gps.date.month();
+            gpsData.day = gps.date.day();
+        }
+        if (gps.time.isValid()) {
+            gpsData.hour = gps.time.hour();
+            gpsData.minute = gps.time.minute();
+            gpsData.second = gps.time.second();
+        }
+        
+        vTaskDelay(100 / portTICK_RATE_MS); // delay 100ms
+    }
 }
 
 /**
@@ -150,8 +202,10 @@ int counter() {
 }
 
 void setup() {
-  Serial.begin(DEBUG_BAUDRATE);
+  Serial.begin(SERIAL_BAUDRATE);
   Serial2.begin(GPS_BAUDRATE);
+  
+  xTaskCreate(gpsReaderTask, "GPS Reader Task", 2048, NULL, 1, NULL);
 
   // Initliaze the TFT display
   tft.begin();
@@ -193,49 +247,54 @@ void loop() {
   // Read data from the GPS module using TinyGPSPlus
 //  Serial.print("Serial2 bytes available: ");
 //  Serial.println(Serial2.available());
-  while (Serial2.available() > 0) {
-    gps.encode(Serial2.read());
-  }
+//  while (Serial2.available() > 0) {
+//    gps.encode(Serial2.read());
+//  }
 
   // Output the GPS data to the Serial Monitor
 //  printTextGPSData_Serial(gps);
 
   // Output the GPS data to the TFT display
   // printTextGPSData_TFT(gps);
+// You can access gpsData here
+//  Serial.println("GPS Sats: " + String(gpsData.sats));
+//  Serial.println("GPS Speed: " + String((int)gpsData.speed) + " mph");
+//  Serial.println("GPS Coordinates: " + String(gpsData.latitude) + ", " + String(gpsData.longitude));
+//  Serial.println("GPS Date and Time: " + String(gpsData.year) + "-" + String(gpsData.month) + "-" + String(gpsData.day) + " " + String(gpsData.hour) + ":" + String(gpsData.minute) + ":" + String(gpsData.second));
 
   // Format the time string into 24 hour clock and US date format
-  int adjustedHour = gps.time.hour() + TZ_OFFSET;
+  int adjustedHour = gpsData.hour + TZ_OFFSET;
   if (adjustedHour < 0) {
       adjustedHour += 24;
   }
-  snprintf(dateBuffer, sizeof(dateBuffer), "%02d/%02d/%04d", gps.date.month(), gps.date.day(), gps.date.year());
-  snprintf(timeBuffer, sizeof(timeBuffer), "%02d:%02d:%02d", adjustedHour, gps.time.minute(), gps.time.second());
+  snprintf(dateBuffer, sizeof(dateBuffer), "%02d/%02d/%04d", gpsData.month, gpsData.day, gpsData.year);
+  snprintf(timeBuffer, sizeof(timeBuffer), "%02d:%02d:%02d", adjustedHour, gpsData.minute, gpsData.second);
 //  snprintf(timeBuffer, sizeof(timeBuffer), "%02d:%02d", adjustedHour, gps.time.minute());
 
   lv_label_set_text(ui_Date, dateBuffer);
   lv_label_set_text(ui_Time, timeBuffer);
 
-  if(gps.sentencesWithFix() > 4) {
+  if(gps.sentencesWithFix() > 0 && satFix == false) {
     lv_obj_clear_flag(ui_SatImg, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(ui_SatNumBackGround, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(ui_SatNum, LV_OBJ_FLAG_HIDDEN);
+    satFix = true;
 //    lv_obj_set_style_bg_color(ui_textSpeed, lv_color_hex(0x009427), LV_PART_MAIN);
 //    lv_obj_set_style_bg_color(ui_textHeading, lv_color_hex(0x009427), LV_PART_MAIN);
 //    lv_obj_set_style_bg_color(ui_labelSats, lv_color_hex(0x323136), LV_PART_MAIN);
   } 
 
   static char bufSats[16];
-  std::snprintf(bufSats, sizeof(bufSats), "%02d", (int)gps.satellites.value());
+  std::snprintf(bufSats, sizeof(bufSats), "%02d", gpsData.sats);
   lv_label_set_text(ui_SatNum, bufSats);
 
   static char bufSpeed[16];
-  std::snprintf(bufSpeed, sizeof(bufSpeed), "%03d", (int)gps.speed.mph());
+  std::snprintf(bufSpeed, sizeof(bufSpeed), "%03d", (int)gpsData.speed);
 //  std::snprintf(bufSpeed, sizeof(bufSpeed), "%03d", counter());
   lv_label_set_text(ui_SpeedNum, bufSpeed);
-  lv_arc_set_value(ui_SpeedArc, (int)gps.speed.mph());
 //  lv_arc_set_value(ui_SpeedArc, counter());
 
-  lv_label_set_text(ui_Heading, directionHeading(gps));
+//  lv_label_set_text(ui_Heading, directionHeading(gps));
 
   // Set refresh rate
   delay(REFRESH_RATE);

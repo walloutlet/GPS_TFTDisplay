@@ -28,7 +28,6 @@ extern "C" {
 // SCREEN: ui_Speedo
 void ui_Speedo_screen_init(void);
 extern lv_obj_t * ui_Speedo;
-extern lv_obj_t * ui_SpeedArc;
 extern lv_obj_t * ui_SpeedNumBackGround;
 extern lv_obj_t * ui_SpeedNum;
 extern lv_obj_t * ui_TimeBackGround;
@@ -40,6 +39,10 @@ extern lv_obj_t * ui_SatImg;
 extern lv_obj_t * ui_SatNumBackGround;
 extern lv_obj_t * ui_SatNum;
 extern lv_obj_t * ui_Heading;
+extern lv_obj_t * ui_SpeedChart;
+extern lv_obj_t * ui_SpeedChart_Xaxis;
+extern lv_obj_t * ui_SpeedChart_Yaxis1;
+extern lv_obj_t * ui_SpeedChart_Yaxis2;
 // CUSTOM VARIABLES
 
 // EVENTS
@@ -50,9 +53,9 @@ extern lv_obj_t * ui____initial_actions0;
 LV_IMG_DECLARE(ui_img_1946256235);    // assets/satellite-antenna-emoji-20x25.png
 
 // FONTS
+LV_FONT_DECLARE(ui_font_Digital_Mono_10);
 LV_FONT_DECLARE(ui_font_Digital_Mono_16);
 LV_FONT_DECLARE(ui_font_Digital_Mono_72);
-LV_FONT_DECLARE(ui_font_Digital_Mono_10);
 
 // UI INIT
 void ui_init(void);

@@ -12,7 +12,6 @@
 // SCREEN: ui_Speedo
 void ui_Speedo_screen_init(void);
 lv_obj_t * ui_Speedo;
-lv_obj_t * ui_SpeedArc;
 lv_obj_t * ui_SpeedNumBackGround;
 lv_obj_t * ui_SpeedNum;
 lv_obj_t * ui_TimeBackGround;
@@ -24,6 +23,10 @@ lv_obj_t * ui_SatImg;
 lv_obj_t * ui_SatNumBackGround;
 lv_obj_t * ui_SatNum;
 lv_obj_t * ui_Heading;
+lv_obj_t * ui_SpeedChart;
+lv_obj_t * ui_SpeedChart_Xaxis;
+lv_obj_t * ui_SpeedChart_Yaxis1;
+lv_obj_t * ui_SpeedChart_Yaxis2;
 // CUSTOM VARIABLES
 
 // EVENTS

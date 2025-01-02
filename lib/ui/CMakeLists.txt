@@ -3,8 +3,8 @@ SET(SOURCES ui_Speedo.c
     ui_comp_hook.c
     ui_helpers.c
     ui_img_1946256235.c
+    fonts/ui_font_Digital_Mono_10.c
     fonts/ui_font_Digital_Mono_16.c
-    fonts/ui_font_Digital_Mono_72.c
-    fonts/ui_font_Digital_Mono_10.c)
+    fonts/ui_font_Digital_Mono_72.c)
 
 add_library(ui ${SOURCES})
