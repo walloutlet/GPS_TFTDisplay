@@ -29,7 +29,7 @@
 #define BOOT_BUTTON_PIN 0
 
 // Debug mode configuration
-#define DEBUG    // Comment this line out to disable debug features
+// #define DEBUG                                   // Comment this line out to disable debug features
 
 // Serial configuration
 #ifdef DEBUG

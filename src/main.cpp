@@ -44,13 +44,47 @@ void displayErrorCount(int errorCount) {
 
   // Calculate the position to center the text
   String errorStr = "Errors: " + String(errorCount);  // Convert error count to string
-  int textWidth = tft.textWidth(errorStr);           // Get the width of the text
-  int x = (240 - textWidth) / 2;                     // Calculate x position to center the text
-  int y = 150;                                       // Y position for the text
+  int textWidth = tft.textWidth(errorStr);            // Get the width of the text
+  int x = (240 - textWidth) / 2;                      // Calculate x position to center the text
+  int y = 100;                                        // Y position for the text
 
   // Display the error count
   tft.setCursor(x, y);
   tft.print(errorStr);
+}
+
+void displayNoGPSSignal() {
+  tft.fillScreen(TFT_BLACK);  // Clear the screen
+
+  tft.setTextSize(2);  // Set text size
+  tft.setTextColor(TFT_WHITE, TFT_BLACK);  // Set text color to white with black background
+
+  // Calculate the position to center the text
+  String message = "No GPS Signal";
+  int textWidth = tft.textWidth(message);  // Get the width of the text
+  int x = (240 - textWidth) / 2;           // Calculate x position to center the text
+  int y = 100;                             // Calculate y position to center the text
+
+  // Display the message
+  tft.setCursor(x, y);
+  tft.print(message);
+}
+
+void displayNoGPSSpeedSignal() {
+  tft.fillScreen(TFT_BLACK);  // Clear the screen
+
+  tft.setTextSize(2);  // Set text size
+  tft.setTextColor(TFT_WHITE, TFT_BLACK);  // Set text color to white with black background
+
+  // Calculate the position to center the text
+  String message = "No GPS Speed";
+  int textWidth = tft.textWidth(message);  // Get the width of the text
+  int x = (240 - textWidth) / 2;           // Calculate x position to center the text
+  int y = 100;                             // Calculate y position to center the text
+
+  // Display the message
+  tft.setCursor(x, y);
+  tft.print(message);
 }
 
 // Function to display the speed on the TFT screen
@@ -93,10 +127,11 @@ void getGPSSpeed(void) {
     #endif
   }
   else {
+    gpsSpeedInvalid++;
     updatePrefs();
+    displayNoGPSSpeedSignal();
     #ifdef DEBUG
       Serial.println("[DEBUG] No valid GPS speed!");
-      gpsSpeedInvalid++;
     #endif
   }
 }
@@ -107,14 +142,22 @@ void setup() {
     Serial.begin(SERIAL_BAUDRATE);
   #endif
 
+  // Initialize Preferences
+  prefs.begin("gpsData", false);
+
   // Initialize TFT Display
   tft.begin();
   tft.setRotation(SCREEN_ROTATION); // Set rotation to 0 degrees
   tft.fillScreen(TFT_BLACK);
 
+  displayErrorCount(prefs.getInt("speedErr", 0));
+  if(prefs.getInt("speedErr") != 0) {
+    delay(5000);
+  }
+
   #ifdef DEBUG
     Serial.print("[DEBUG] Previous GPS Speed Errors: ");
-    Serial.println( prefs.getInt("speedErr", 0));
+    Serial.println(prefs.getInt("speedErr", 0));
     delay(5000);
   #endif
 
@@ -141,8 +184,10 @@ void loop() {
 
   // Check if GPS Data is Valid
   if (gps.location.isValid()) {
+    tft.fillScreen(TFT_BLACK);                  // Fill the screen with black color
     getGPSSpeed();                              // Process GPS Speed Information
   } else {
+    displayNoGPSSignal();
     #ifdef DEBUG
       Serial.println("[DEBUG] No GPS Signal!");
     #endif
@@ -150,9 +195,9 @@ void loop() {
 
   // Check if the boot button is pressed
   if (digitalRead(BOOT_BUTTON_PIN) == LOW) {
-    displayErrorCount(gpsSpeedInvalid);  // Display the error count on the TFT screen
-    delay(5000);  // Debounce delay
-    tft.fillScreen(TFT_BLACK);  // Fill the screen with black color
+    displayErrorCount(gpsSpeedInvalid);         // Display the error count on the TFT screen
+    delay(5000);                                // Debounce delay
+    tft.fillScreen(TFT_BLACK);                  // Fill the screen with black color
   }
 
   delay(100);
