@@ -133,7 +133,7 @@ void processGPSSpeed(void) {
   if (gps.speed.isValid()) {
     float speed = gps.speed.mph();
 
-    // Smooth the speed data
+    // Smooth the speed data using a simple moving average function
     total = total - readings[readIndex];
     readings[readIndex] = speed;
     total = total + readings[readIndex];
