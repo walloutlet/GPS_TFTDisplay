@@ -150,8 +150,8 @@ void getGPSSpeed(void) {
   else {
     if (newGPSSpeed) {
       gpsSpeedInvalid++;
-      updatePrefs();
     }
+    updatePrefs();
     displayNoGPSSpeedSignal();
     #ifdef DEBUG
       Serial.println("[DEBUG] No GPS Speed!");
