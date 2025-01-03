@@ -18,6 +18,7 @@ HardwareSerial gpsSerial(1);
 
 // Flags
 bool newGPSSpeed = false;
+bool enableSpeedSmoothing = true;
 
 // Error counters
 int gpsSpeedInvalid = 0;
@@ -36,11 +37,9 @@ void updatePrefs(void) {
 }
 
 void displayErrorCount(int errorCount) {
+  tft.fillScreen(TFT_BLACK);  // Clear the screen
   tft.setTextSize(2);  // Set text size
   tft.setTextColor(TFT_WHITE, TFT_BLACK);  // Set text color to white with black background
-
-  // Clear the previous display by drawing a black rectangle over it
-  tft.fillRect(0, 150, 240, 40, TFT_BLACK);  // Adjust the position and size as needed
 
   // Calculate the position to center the text
   String errorStr = "Errors: " + String(errorCount);  // Convert error count to string
@@ -96,42 +95,66 @@ void displaySpeed(float speed) {
   tft.fillRect(0, 100, 240, 40, TFT_BLACK);  // Adjust the position and size as needed
 
   // Calculate the position to center the text
-  String speedStr = String(speed, 2) + " mph";  // Convert speed to string with 1 decimal place
-  int textWidth = tft.textWidth(speedStr);      // Get the width of the text
-  int x = (240 - textWidth) / 2;                // Calculate x position to center the text
-  int y = 100;                                  // Y position for the text
-
-  // Display the speed
-  tft.setCursor(x, y);
-  tft.print(speedStr);
+  if (enableSpeedSmoothing) {
+    String speedStr = String(speed, 2) + " mph (S)";  // Convert speed to string with 2 decimal place
+    int textWidth = tft.textWidth(speedStr);          // Get the width of the text
+    int x = (240 - textWidth) / 2;                    // Calculate x position to center the text
+    int y = 100;                                      // Y position for the text
+    // Display the speed
+    tft.setCursor(x, y);
+    tft.print(speedStr);
+  }
+  else {
+    String speedStr = String(speed, 2) + " mph (NS)";  // Convert speed to string with 2 decimal place
+    int textWidth = tft.textWidth(speedStr);          // Get the width of the text
+    int x = (240 - textWidth) / 2;                    // Calculate x position to center the text
+    int y = 100;                                      // Y position for the text
+    // Display the speed
+    tft.setCursor(x, y);
+    tft.print(speedStr);
+  }
 }
 
 void getGPSSpeed(void) {
   if (gps.speed.isValid()) {
-    // Smooth the speed data using a simple moving average function
-    total = total - readings[readIndex];
-    readings[readIndex] = gps.speed.mph();
-    total = total + readings[readIndex];
-    readIndex = (readIndex + 1) % numReadings;
-    speedAvg = total / numReadings;
+    newGPSSpeed = true;
+    if (enableSpeedSmoothing) {
+      // Smooth the speed data using a simple moving average function
+      total = total - readings[readIndex];
+      readings[readIndex] = gps.speed.mph();
+      total = total + readings[readIndex];
+      readIndex = (readIndex + 1) % numReadings;
+      speedAvg = total / numReadings;
+    }
+    else {
+      speedAvg = gps.speed.mph();
+    }
 
     // Display the updated speed on the TFT screen
     displaySpeed(speedAvg);
 
     #ifdef DEBUG
-      Serial.print("[DEBUG] Speed: ");
-      Serial.print(speedAvg);
+      Serial.print("[DEBUG] GPS Speed: ");
+      Serial.print(gps.speed.mph());
       Serial.print(" mph");
       Serial.print("  Err count: ");
-      Serial.println(gpsSpeedInvalid);
+      Serial.print(gpsSpeedInvalid);
+      if (enableSpeedSmoothing) {
+        Serial.print("  Smoothed Speed: ");
+        Serial.print(speedAvg);
+        Serial.print(" mph");
+      }
+      Serial.print("\n");
     #endif
   }
   else {
-    gpsSpeedInvalid++;
-    updatePrefs();
+    if (newGPSSpeed) {
+      gpsSpeedInvalid++;
+      updatePrefs();
+    }
     displayNoGPSSpeedSignal();
     #ifdef DEBUG
-      Serial.println("[DEBUG] No valid GPS speed!");
+      Serial.println("[DEBUG] No GPS Speed!");
     #endif
   }
 }
