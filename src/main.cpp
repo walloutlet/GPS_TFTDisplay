@@ -31,6 +31,82 @@ float total = 0;             // Running total
 float speedGPSReturned = 0;  // Raw speed returned from GPS read
 float speedAvg = 0;          // Smoothed speed
 
+class LC76GGPS {
+private:
+    // Calculate NMEA checksum
+    String calculateChecksum(const String& sentence) {
+        uint8_t checksum = 0;
+        // Calculate for characters between $ and *
+        for (int i = 1; i < sentence.length(); i++) {
+            checksum ^= sentence[i];
+        }
+        char checksumStr[3];
+        sprintf(checksumStr, "%02X", checksum);
+        return String(checksumStr);
+    }
+
+    // Send command and wait for acknowledgment
+    bool sendCommand(const String& command, int timeout = 1000) {
+        Serial.println("Sending command: " + command);  // Debug output
+        gpsSerial.print(command);
+        
+        unsigned long startTime = millis();
+        String response;
+        
+        while (millis() - startTime < timeout) {
+            if (gpsSerial.available()) {
+                char c = gpsSerial.read();
+                response += c;
+                if (c == '\n') {
+                    Serial.println("Response: " + response);  // Debug output
+                    response = "";
+                }
+            }
+        }
+        return true;  // For LC76G we assume success if no error response
+    }
+
+public:
+    void begin() {
+        gpsSerial.begin(GPS_BAUDRATE, SERIAL_8N1, GPS_RX, GPS_TX);
+        delay(100);  // Allow module to stabilize
+    }
+
+    // Set update rate to 10Hz (100ms interval)
+    bool setUpdateRate10Hz() {
+        // Create command to set 100ms positioning interval
+        String posFreqCmd = "$PAIR050,100";
+        posFreqCmd += "*" + calculateChecksum(posFreqCmd);
+        posFreqCmd += "\r\n";
+
+        // Send the command
+        if (!sendCommand(posFreqCmd)) {
+            return false;
+        }
+
+        // Wait a bit before sending next command
+        delay(100);
+
+        // Set output configuration for RMC and GGA at high rate
+        // Type 0 = GGA, Type 1 = RMC
+        String configGGACmd = "$PAIR062,0,1";
+        configGGACmd += "*" + calculateChecksum(configGGACmd);
+        configGGACmd += "\r\n";
+        
+        if (!sendCommand(configGGACmd)) {
+            return false;
+        }
+
+        delay(100);
+
+        String configRMCCmd = "$PAIR062,1,1";
+        configRMCCmd += "*" + calculateChecksum(configRMCCmd);
+        configRMCCmd += "\r\n";
+        
+        return sendCommand(configRMCCmd);
+    }
+};
+
 // Function to save the values to NVS (Non-Volatile Storage)
 void updatePrefs(void) {
   prefs.putInt("speedErr", gpsSpeedInvalid);             // Save error count
@@ -174,9 +250,7 @@ void setup() {
   tft.fillScreen(TFT_BLACK);
 
   displayErrorCount(prefs.getInt("speedErr", 0));
-  if(prefs.getInt("speedErr") != 0) {
-    delay(5000);
-  }
+  delay(5000);
 
   #ifdef DEBUG
     Serial.print("[DEBUG] Previous GPS Speed Errors: ");
@@ -188,7 +262,17 @@ void setup() {
   updatePrefs();
 
   // Initialize GPS Serial
-  gpsSerial.begin(GPS_BAUDRATE, SERIAL_8N1, GPS_RX, GPS_TX);
+  // gpsSerial.begin(GPS_BAUDRATE, SERIAL_8N1, GPS_RX, GPS_TX);
+  // Initialize the GPS object
+  LC76GGPS lc76g;
+  lc76g.begin();
+  
+  // Set update rate to 10Hz
+  if (lc76g.setUpdateRate10Hz()) {
+      Serial.println("[DEBUG] Successfully set update rate to 10Hz");
+  } else {
+      Serial.println("[DEBUG] Failed to set update rate");
+  }
 
   // Configure the PPS pin as input
   pinMode(GPS_PPS, INPUT);
