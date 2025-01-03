@@ -24,7 +24,7 @@ bool enableSpeedSmoothing = true;
 int gpsSpeedInvalid = 0;
 
 // Speed Smoothing variables
-const int numReadings = 3;   // Number of readings to store, default: 5 (smaller = more responsive to changes in speed but jumpy / larger smoother but less responsive)
+const int numReadings = 5;   // Number of readings to store, default: 5 (smaller = more responsive to changes in speed but jumpy / larger smoother but less responsive)
 float readings[numReadings]; // Readings from the analog input
 int readIndex = 0;           // Index of the current reading
 float total = 0;             // Running total
@@ -150,8 +150,8 @@ void getGPSSpeed(void) {
   else {
     if (newGPSSpeed) {
       gpsSpeedInvalid++;
+      updatePrefs();
     }
-    updatePrefs();
     displayNoGPSSpeedSignal();
     #ifdef DEBUG
       Serial.println("[DEBUG] No GPS Speed!");
@@ -183,6 +183,9 @@ void setup() {
     Serial.println(prefs.getInt("speedErr", 0));
     delay(5000);
   #endif
+
+  // Reset memory values
+  updatePrefs();
 
   // Initialize GPS Serial
   gpsSerial.begin(GPS_BAUDRATE, SERIAL_8N1, GPS_RX, GPS_TX);
