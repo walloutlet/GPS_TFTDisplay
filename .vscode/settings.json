@@ -56,5 +56,6 @@
         "typeinfo": "cpp",
         "main cpp": "cpp",
         "bitset": "cpp"
-    }
+    },
+    "cmake.ignoreCMakeListsMissing": true
 }

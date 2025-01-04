@@ -236,5 +236,14 @@ void ui_Speedo_screen_init(void)
     lv_obj_set_style_outline_pad(ui_SpeedChart, LV_MAX3(50, 10, 0),
                                  LV_PART_MAIN | LV_STATE_DEFAULT);   //workaround for ineffective 'overflow visible' flag
     lv_obj_set_style_outline_width(ui_SpeedChart, -1, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_SmoothingLabel = lv_label_create(ui_Speedo);
+    lv_obj_set_width(ui_SmoothingLabel, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_SmoothingLabel, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_SmoothingLabel, 61);
+    lv_obj_set_y(ui_SmoothingLabel, -27);
+    lv_obj_set_align(ui_SmoothingLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_SmoothingLabel, "Smoothing");
+    lv_obj_set_style_text_font(ui_SmoothingLabel, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
+
 
 }

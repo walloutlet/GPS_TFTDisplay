@@ -59,24 +59,25 @@ volatile bool gpsReady = false;
 char sysDateBuffer[11]; // YYYY/MM/DD + null terminator
 char sysTimeBuffer[9];  // HH:MM:SS + null terminator
 
-// Circular buffer for storing the last 100 speed values
+// Circular buffer for storing the last 64 speed values
 const int speedBufferSize = CHART_POINTS;
 float speedBuffer[speedBufferSize];
 int speedBufferIndex = 0;
 bool speedBufferFull = false;
 
-// Circular buffer for storing the last 100 sat values
+// Circular buffer for storing the last 64 sat values
 const int satBufferSize = CHART_POINTS;
 int satBuffer[satBufferSize];
 int satBufferIndex = 0;
 bool satBufferFull = false;
 
 // Speed Smoothing variables
-const int numReadings = 5;   // Number of readings to store, default: 5 (smaller = more responsive to changes in speed but jumpy / larger smoother but less responsive)
-float readings[numReadings]; // Readings from the analog input
-int readIndex = 0;           // Index of the current reading
-float total = 0;             // Running total
-float average = 0;           // The average
+bool enableSmoothing = true;  // Flag to enable or disable smoothing
+const int numReadings = 5;    // Number of readings to store, default: 5 (smaller = more responsive to changes in speed but jumpy / larger smoother but less responsive)
+float readings[numReadings];  // Readings from the analog input
+int readIndex = 0;            // Index of the current reading
+float total = 0;              // Running total
+float average = 0;            // The average
 
 // Timer interrupt variables
 hw_timer_t *timer0 = NULL;
@@ -134,20 +135,24 @@ void processGPSSpeed(void) {
   if (gps.speed.isValid()) {
     float speed = gps.speed.mph();
 
-    // Smooth the speed data using a simple moving average function
-    total = total - readings[readIndex];
-    readings[readIndex] = speed;
-    total = total + readings[readIndex];
-    readIndex = (readIndex + 1) % numReadings;
-    average = total / numReadings;
+    if (enableSmoothing) {
+      // Smooth the speed data using a simple moving average function
+      total = total - readings[readIndex];
+      readings[readIndex] = speed;
+      total = total + readings[readIndex];
+      readIndex = (readIndex + 1) % numReadings;
+      average = total / numReadings;
+      // Round the average to the nearest whole number
+      average = round(average);
+    }
+    else {
+      average = speed;
+    }
 
     // Catch any GPS data corruption, set speed to 0 if a negative number is calculated
     if (average < 0) {
       average = 0.0f;
     }
-
-    // Round the average to the nearest whole number
-    average = round(average);
 
     // Update the speed value if it has changed
     if (average != currentSpeed) {
@@ -183,6 +188,25 @@ void updateSatChart() {
   for (int i = 0; i < count; i++) {
     int index = (startIndex + i) % satBufferSize;
     lv_chart_set_next_value(ui_SpeedChart, ui_SpeedChart_series_2, satBuffer[index]);
+  }
+}
+
+void checkBootButton() {
+  if (!digitalRead(BOOT_BUTTON_PIN)) {
+    // Toggle the enableSmoothing flag
+    enableSmoothing = !enableSmoothing;
+    if(enableSmoothing){
+      lv_obj_remove_flag(ui_SmoothingLabel, LV_OBJ_FLAG_HIDDEN);
+    }
+    else {
+      lv_obj_add_flag(ui_SmoothingLabel, LV_OBJ_FLAG_HIDDEN);
+    }
+
+    #ifdef DEBUG
+      Serial.print("[DEBUG] Button Press Detected! Smoothing is now ");
+      Serial.println(enableSmoothing ? "Enabled" : "Disabled");
+      delay(1000);
+    #endif
   }
 }
 
@@ -358,6 +382,9 @@ void setup() {
   // Configure the PPS pin as input
   pinMode(GPS_PPS, INPUT);
 
+  // Initialize the boot button pin
+  pinMode(BOOT_BUTTON_PIN, INPUT_PULLUP);
+
   // Attach the interrupt to the PPS pin
   attachInterrupt(digitalPinToInterrupt(GPS_PPS), ppsISR, RISING);
 
@@ -393,6 +420,9 @@ void setup() {
 void loop() {
   // Run the LVGL GUI
   lv_timer_handler();
+
+  // Check if the boot button is pressed to toggle smoothing
+  checkBootButton();
 
   // Check if GPS data is ready to be processed
   if (gpsReady) {
