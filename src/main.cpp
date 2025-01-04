@@ -59,18 +59,6 @@ volatile bool gpsReady = false;
 char sysDateBuffer[11]; // YYYY/MM/DD + null terminator
 char sysTimeBuffer[9];  // HH:MM:SS + null terminator
 
-// Circular buffer for storing the last 64 speed values
-const int speedBufferSize = CHART_POINTS;
-float speedBuffer[speedBufferSize];
-int speedBufferIndex = 0;
-bool speedBufferFull = false;
-
-// Circular buffer for storing the last 64 sat values
-const int satBufferSize = CHART_POINTS;
-int satBuffer[satBufferSize];
-int satBufferIndex = 0;
-bool satBufferFull = false;
-
 // Speed Smoothing variables
 bool enableSmoothing = true;  // Flag to enable or disable smoothing
 const int numReadings = 5;    // Number of readings to store, default: 5 (smaller = more responsive to changes in speed but jumpy / larger smoother but less responsive)
@@ -93,13 +81,6 @@ void processSatNum(void) {
     if (sats != (int)currentSats) {
       currentSats = sats;
       newSatNumAvailable = true;
-
-      // Store the satelitte count in the circular buffer
-      satBuffer[satBufferIndex] = currentSats;
-      satBufferIndex = (satBufferIndex + 1) % satBufferSize;
-      if (satBufferIndex == 0) {
-        satBufferFull = true;
-      }
     }
   }
 }
@@ -161,36 +142,7 @@ void processGPSSpeed(void) {
     if (average != currentSpeed) {
       currentSpeed = average;
       newSpeedAvailable = true;
-
-      // Store the speed in the circular buffer
-      speedBuffer[speedBufferIndex] = currentSpeed;
-      speedBufferIndex = (speedBufferIndex + 1) % speedBufferSize;
-      if (speedBufferIndex == 0) {
-        speedBufferFull = true;
-      }
     }
-  }
-}
-
-void updateSpeedChart() {
-  // Add the last 100 speed values to the chart
-  int count = speedBufferFull ? speedBufferSize : speedBufferIndex;
-  int startIndex = speedBufferFull ? speedBufferIndex : 0;
-
-  for (int i = 0; i < count; i++) {
-    int index = (startIndex + i) % speedBufferSize;
-    lv_chart_set_next_value(ui_SpeedChart, ui_SpeedChart_series_1, speedBuffer[index]);
-  }
-}
-
-void updateSatChart() {
-  // Add the last 100 sat values to the chart
-  int count = satBufferFull ? satBufferSize : satBufferIndex;
-  int startIndex = satBufferFull ? satBufferIndex : 0;
-
-  for (int i = 0; i < count; i++) {
-    int index = (startIndex + i) % satBufferSize;
-    lv_chart_set_next_value(ui_SpeedChart, ui_SpeedChart_series_2, satBuffer[index]);
   }
 }
 
@@ -496,7 +448,6 @@ void loop() {
     static char bufSats[4];
     std::snprintf(bufSats, sizeof(bufSats), "%02d", currentSats);
     lv_label_set_text(ui_SatNum, bufSats);
-//    updateSatChart();
   }
 
   if (newSpeedAvailable) {
@@ -504,7 +455,6 @@ void loop() {
     static char bufSpeed[4];
     std::snprintf(bufSpeed, sizeof(bufSpeed), "%03d", (int)currentSpeed);
     lv_label_set_text(ui_SpeedNum, bufSpeed);
-//    updateSpeedChart();
   }
 
   if (newHeadingAvailable){
@@ -521,8 +471,8 @@ void loop() {
 
 
   if (ppsTriggered) {
-    updateSatChart();
-    updateSpeedChart();
+    lv_chart_set_next_value(ui_SpeedChart, ui_SpeedChart_series_1, (int)currentSpeed);
+    lv_chart_set_next_value(ui_SpeedChart, ui_SpeedChart_series_2, (int)currentSats);
     ppsTriggered = false;
   }
 
