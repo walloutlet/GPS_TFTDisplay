@@ -34,7 +34,7 @@ void ui_Speedo_screen_init(void)
     lv_obj_set_x(ui_SpeedNum, 0);
     lv_obj_set_y(ui_SpeedNum, -70);
     lv_obj_set_align(ui_SpeedNum, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_SpeedNum, "888");
+    lv_label_set_text(ui_SpeedNum, "---");
     lv_obj_remove_flag(ui_SpeedNum, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
                        LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
                        LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
@@ -145,7 +145,7 @@ void ui_Speedo_screen_init(void)
     lv_obj_set_x(ui_SatNum, -75);
     lv_obj_set_y(ui_SatNum, -30);
     lv_obj_set_align(ui_SatNum, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_SatNum, "88");
+    lv_label_set_text(ui_SatNum, "--");
     lv_obj_remove_flag(ui_SatNum, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
                        LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
                        LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags

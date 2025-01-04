@@ -489,5 +489,5 @@ void loop() {
     updateSpeedChart();
     ppsTriggered = false;
   }
-*/  
+*/
 }

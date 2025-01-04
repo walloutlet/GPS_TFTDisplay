@@ -1,17 +1,18 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
-#define TZ_OFFSET -5
+#define TZ_OFFSET           -5
 
-#define GPS_BAUDRATE 115200
-#define GPS_REFRESH_RATE 100                  // Refresh rate of data update, default 100ms
-#define SCREEN_REFRESH_RATE 10                // Refresh rate of data update, default 10ms
-#define GPS_CLOCK_SYNC 3600                   // System clock GPS time sync intervale, in seconds, default 3600 seconds [1 hour]
+#define GPS_BAUDRATE        115200
+#define GPS_REFRESH_RATE    100              // Refresh rate of data update, default 100ms
+#define GPS_CLOCK_SYNC      3600             // System clock GPS time sync intervale, in seconds, default 3600 seconds [1 hour]
 
-#define SCREEN_WIDTH 240
-#define SCREEN_HEIGHT 240
-#define SCREEN_ROTATION 0
-#define CHART_POINTS 10
+#define SCREEN_REFRESH_RATE 10               // Refresh rate of data update, default 10ms
+#define SCREEN_WIDTH        240
+#define SCREEN_HEIGHT       240
+#define SCREEN_ROTATION     1                // Screen rotation; 0 = 0 degrees, 1 = 90 degrees, 2 = 180 degrees, 3 = 270 degrees
+
+#define CHART_POINTS        64               // Number of points defined on the LVGL chart
 
 // TFT Display Pins
 #define TFT_MOSI 23
@@ -26,7 +27,7 @@
 #define GPS_PPS  34
 
 // Debug mode configuration
-#define DEBUG    // Comment this line out to disable debug features
+// #define DEBUG    // Comment this line out to disable debug features
 
 // Serial configuration
 #ifdef DEBUG
