@@ -142,7 +142,6 @@ void setup() {
 
   // Initialize the GPS hardware
   lc76g.begin(GPS_RX, SERIAL_8N1, GPS_TX, GPS_BAUDRATE);
-  lc76g.sendCommand("$PAIR051");
   if (lc76g.setUpdateRate(GPS_REFRESH_RATE)) {
     displayMessage("GPS Module Updated!");
     delay(2000);
@@ -159,7 +158,7 @@ void setup() {
     #endif
   }
 
-  displayMessage("Errors: " + prefs.getInt("speedErr", 0));
+  displayMessage("Errors: " + String(prefs.getInt("speedErr", 0)));
   delay(2000);
 
   #ifdef DEBUG
@@ -168,7 +167,7 @@ void setup() {
     delay(5000);
   #endif
 
-  // Reset memory values
+  // Overwrite previous memory values
   updatePrefs();
 
   // Configure the PPS pin as input

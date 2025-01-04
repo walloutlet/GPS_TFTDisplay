@@ -42,9 +42,6 @@ public:
     void begin(uint8_t rx_pin = 16, uint32_t config = SERIAL_8N1, uint8_t tx_pin = 17, uint32_t baud = 9600);
     void update();
 
-    // Send command methods
-    bool sendCommand(const String& cmd);
-
     // Configuration methods
     bool setUpdateRate(uint32_t rate);
     bool setBaudRate(uint32_t baud);
@@ -54,6 +51,7 @@ private:
     static const char HEX_CHARS[16];
     
     String calculateChecksum(const String& data);
+    bool sendCommand(const String& cmd);
     bool waitForAck(unsigned long timeout = 1000);
 };
 
