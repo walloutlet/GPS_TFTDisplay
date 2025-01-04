@@ -10,7 +10,8 @@
 
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 240
-#define SCREEN_ROTATION 0
+#define SCREEN_ROTATION 1                     // 0 = 0 degrees, 1 = 90 degrees, 2 = 180 degrees, 3 = 270 degrees
+#define SCREEN_BRIGHTNESS 128                 
 #define CHART_POINTS 10
 
 // TFT Display Pins

@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <Preferences.h>
 #include <TinyGPS++.h>
+#include <LC76G.h>
 #include <TFT_eSPI.h>
 #include "config.h"
 
@@ -10,15 +11,15 @@ Preferences prefs;
 // Initialize the TFT object
 TFT_eSPI tft = TFT_eSPI();
 
+// Initialize the LC76G GPS instance
+LC76G lc76g;
+
 // Initialize GPS object
 TinyGPSPlus gps;
 
-// HardwareSerial for GPS
-HardwareSerial gpsSerial(1);
-
 // Flags
 bool newGPSSpeed = false;
-bool enableSpeedSmoothing = true;
+bool enableSpeedSmoothing = false;
 
 // Error counters
 int gpsSpeedInvalid = 0;
@@ -30,82 +31,6 @@ int readIndex = 0;           // Index of the current reading
 float total = 0;             // Running total
 float speedGPSReturned = 0;  // Raw speed returned from GPS read
 float speedAvg = 0;          // Smoothed speed
-
-class LC76GGPS {
-private:
-    // Calculate NMEA checksum
-    String calculateChecksum(const String& sentence) {
-        uint8_t checksum = 0;
-        // Calculate for characters between $ and *
-        for (int i = 1; i < sentence.length(); i++) {
-            checksum ^= sentence[i];
-        }
-        char checksumStr[3];
-        sprintf(checksumStr, "%02X", checksum);
-        return String(checksumStr);
-    }
-
-    // Send command and wait for acknowledgment
-    bool sendCommand(const String& command, int timeout = 1000) {
-        Serial.println("Sending command: " + command);  // Debug output
-        gpsSerial.print(command);
-        
-        unsigned long startTime = millis();
-        String response;
-        
-        while (millis() - startTime < timeout) {
-            if (gpsSerial.available()) {
-                char c = gpsSerial.read();
-                response += c;
-                if (c == '\n') {
-                    Serial.println("Response: " + response);  // Debug output
-                    response = "";
-                }
-            }
-        }
-        return true;  // For LC76G we assume success if no error response
-    }
-
-public:
-    void begin() {
-        gpsSerial.begin(GPS_BAUDRATE, SERIAL_8N1, GPS_RX, GPS_TX);
-        delay(100);  // Allow module to stabilize
-    }
-
-    // Set update rate to 10Hz (100ms interval)
-    bool setUpdateRate10Hz() {
-        // Create command to set 100ms positioning interval
-        String posFreqCmd = "$PAIR050,100";
-        posFreqCmd += "*" + calculateChecksum(posFreqCmd);
-        posFreqCmd += "\r\n";
-
-        // Send the command
-        if (!sendCommand(posFreqCmd)) {
-            return false;
-        }
-
-        // Wait a bit before sending next command
-        delay(100);
-
-        // Set output configuration for RMC and GGA at high rate
-        // Type 0 = GGA, Type 1 = RMC
-        String configGGACmd = "$PAIR062,0,1";
-        configGGACmd += "*" + calculateChecksum(configGGACmd);
-        configGGACmd += "\r\n";
-        
-        if (!sendCommand(configGGACmd)) {
-            return false;
-        }
-
-        delay(100);
-
-        String configRMCCmd = "$PAIR062,1,1";
-        configRMCCmd += "*" + calculateChecksum(configRMCCmd);
-        configRMCCmd += "\r\n";
-        
-        return sendCommand(configRMCCmd);
-    }
-};
 
 // Function to save the values to NVS (Non-Volatile Storage)
 void updatePrefs(void) {
@@ -213,13 +138,13 @@ void getGPSSpeed(void) {
       Serial.print("[DEBUG] GPS Speed: ");
       Serial.print(gps.speed.mph());
       Serial.print(" mph");
-      Serial.print("  Err count: ");
-      Serial.print(gpsSpeedInvalid);
       if (enableSpeedSmoothing) {
         Serial.print("  Smoothed Speed: ");
         Serial.print(speedAvg);
         Serial.print(" mph");
       }
+      Serial.print("  Err count: ");
+      Serial.print(gpsSpeedInvalid);
       Serial.print("\n");
     #endif
   }
@@ -261,17 +186,20 @@ void setup() {
   // Reset memory values
   updatePrefs();
 
-  // Initialize GPS Serial
-  // gpsSerial.begin(GPS_BAUDRATE, SERIAL_8N1, GPS_RX, GPS_TX);
-  // Initialize the GPS object
-  LC76GGPS lc76g;
-  lc76g.begin();
+  // Initialize the GPS hardware
+  lc76g.begin(GPS_RX, SERIAL_8N1, GPS_TX, GPS_BAUDRATE);
   
   // Set update rate to 10Hz
-  if (lc76g.setUpdateRate10Hz()) {
-      Serial.println("[DEBUG] Successfully set update rate to 10Hz");
+  if (lc76g.setUpdateRate(100)) {
+    #ifdef DEBUG
+      Serial.println("[DEBUG] Successfully set LC76G GPS update rate to 10Hz or 100ms");
+      delay(5000);
+    #endif
   } else {
-      Serial.println("[DEBUG] Failed to set update rate");
+    #ifdef DEBUG
+      Serial.println("[DEBUG] Failed to set LC76G GPS update rate");
+      delay(5000);
+    #endif
   }
 
   // Configure the PPS pin as input
@@ -288,8 +216,8 @@ void setup() {
 
 void loop() {
   // Process GPS Data
-  while (gpsSerial.available() > 0) {
-    gps.encode(gpsSerial.read());
+  while (Serial2.available() > 0) {
+    gps.encode(Serial2.read());
   }
 
   // Check if GPS Data is Valid
