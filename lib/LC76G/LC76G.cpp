@@ -11,21 +11,28 @@ void LC76G::begin(uint8_t rx_pin, uint32_t config, uint8_t tx_pin, uint32_t baud
 
 String LC76G::calculateChecksum(const String& data) {
     uint8_t checksum = 0;
-
+    
     // Calculate for characters between $ and *
     for (int i = 1; i < data.length(); i++) {
-        checksum ^= data[i];
+      if (data[i] == '*') {                 // Stop if an asterisk is found
+        break;
+      }
+      checksum ^= data[i];                  // XOR each character
     }
-    char checksumStr[3];
-    sprintf(checksumStr, "%02X", checksum);
+
+    char checksumStr[3];                    // Buffer to hold two hex digits
+    sprintf(checksumStr, "%02X", checksum); // Format the checksum as two-digit hex
+
     return String(checksumStr);
 }
 
 bool LC76G::sendCommand(const String& cmd) {
     if (serial == nullptr) {
-        Serial.println("[ERROR] Serial hardware not initialized.");
+        std::cout << "[ERROR] Serial hardware not initialized." << std::endl;
         return false;
     }
+
+    // Serial.println("[DEBUG] Sending: " + cmd + "*" + calculateChecksum(cmd));
 
     serial->print("\r\n");  // Start with clean line
     serial->print(cmd);
@@ -67,8 +74,8 @@ bool LC76G::setBaudRate(uint32_t baud) {
         case 115200: cmd = LC76G_BAUD_115200;   break;
         default: return false;
     }
-    sendCommand(cmd);
-    return waitForAck();
+    
+    return sendCommand(cmd);
 }
 
 bool LC76G::waitForAck(unsigned long timeout) {
@@ -85,6 +92,7 @@ bool LC76G::waitForAck(unsigned long timeout) {
             }
         }
     }
-    Serial.println("[ERROR] No response from LC76G module.");
+    std::cout << "[ERROR] No response from LC76G module." << std::endl;
     return false;
+
 }

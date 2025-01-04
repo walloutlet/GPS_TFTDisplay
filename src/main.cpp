@@ -34,57 +34,23 @@ float speedAvg = 0;          // Smoothed speed
 
 // Function to save the values to NVS (Non-Volatile Storage)
 void updatePrefs(void) {
-  prefs.putInt("speedErr", gpsSpeedInvalid);             // Save error count
+  prefs.putInt("speedErr", gpsSpeedInvalid);  // Save error count
 }
 
-void displayErrorCount(int errorCount) {
-  tft.fillScreen(TFT_BLACK);  // Clear the screen
-  tft.setTextSize(2);  // Set text size
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);  // Set text color to white with black background
-
-  // Calculate the position to center the text
-  String errorStr = "Errors: " + String(errorCount);  // Convert error count to string
-  int textWidth = tft.textWidth(errorStr);            // Get the width of the text
-  int x = (240 - textWidth) / 2;                      // Calculate x position to center the text
-  int y = 100;                                        // Y position for the text
-
-  // Display the error count
-  tft.setCursor(x, y);
-  tft.print(errorStr);
-}
-
-void displayNoGPSSignal() {
+void displayMessage(String msg) {
   tft.fillScreen(TFT_BLACK);  // Clear the screen
 
   tft.setTextSize(2);  // Set text size
   tft.setTextColor(TFT_WHITE, TFT_BLACK);  // Set text color to white with black background
 
   // Calculate the position to center the text
-  String message = "No GPS Signal";
-  int textWidth = tft.textWidth(message);  // Get the width of the text
+  int textWidth = tft.textWidth(msg);  // Get the width of the text
   int x = (240 - textWidth) / 2;           // Calculate x position to center the text
   int y = 100;                             // Calculate y position to center the text
 
   // Display the message
   tft.setCursor(x, y);
-  tft.print(message);
-}
-
-void displayNoGPSSpeedSignal() {
-  tft.fillScreen(TFT_BLACK);  // Clear the screen
-
-  tft.setTextSize(2);  // Set text size
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);  // Set text color to white with black background
-
-  // Calculate the position to center the text
-  String message = "No GPS Speed";
-  int textWidth = tft.textWidth(message);  // Get the width of the text
-  int x = (240 - textWidth) / 2;           // Calculate x position to center the text
-  int y = 100;                             // Calculate y position to center the text
-
-  // Display the message
-  tft.setCursor(x, y);
-  tft.print(message);
+  tft.print(msg);
 }
 
 // Function to display the speed on the TFT screen
@@ -153,7 +119,7 @@ void getGPSSpeed(void) {
       gpsSpeedInvalid++;
       updatePrefs();
     }
-    displayNoGPSSpeedSignal();
+    displayMessage("No GPS Speed");
     #ifdef DEBUG
       Serial.println("[DEBUG] No GPS Speed!");
     #endif
@@ -174,8 +140,27 @@ void setup() {
   tft.setRotation(SCREEN_ROTATION); // Set rotation to 0 degrees
   tft.fillScreen(TFT_BLACK);
 
-  displayErrorCount(prefs.getInt("speedErr", 0));
-  delay(5000);
+  // Initialize the GPS hardware
+  lc76g.begin(GPS_RX, SERIAL_8N1, GPS_TX, GPS_BAUDRATE);
+  lc76g.sendCommand("$PAIR051");
+  if (lc76g.setUpdateRate(GPS_REFRESH_RATE)) {
+    displayMessage("GPS Module Updated!");
+    delay(2000);
+    #ifdef DEBUG
+      Serial.println("[DEBUG] Successfully set LC76G GPS update rate to " + String(GPS_REFRESH_RATE) + " ms");
+      delay(5000);
+    #endif
+  } else {
+    displayMessage("No GPS Module!");
+    delay(10000);
+    #ifdef DEBUG
+      Serial.println("[DEBUG] Failed to set LC76G GPS update rate");
+      delay(5000);
+    #endif
+  }
+
+  displayMessage("Errors: " + prefs.getInt("speedErr", 0));
+  delay(2000);
 
   #ifdef DEBUG
     Serial.print("[DEBUG] Previous GPS Speed Errors: ");
@@ -185,22 +170,6 @@ void setup() {
 
   // Reset memory values
   updatePrefs();
-
-  // Initialize the GPS hardware
-  lc76g.begin(GPS_RX, SERIAL_8N1, GPS_TX, GPS_BAUDRATE);
-  
-  // Set update rate to 10Hz
-  if (lc76g.setUpdateRate(100)) {
-    #ifdef DEBUG
-      Serial.println("[DEBUG] Successfully set LC76G GPS update rate to 10Hz or 100ms");
-      delay(5000);
-    #endif
-  } else {
-    #ifdef DEBUG
-      Serial.println("[DEBUG] Failed to set LC76G GPS update rate");
-      delay(5000);
-    #endif
-  }
 
   // Configure the PPS pin as input
   pinMode(GPS_PPS, INPUT);
@@ -225,7 +194,7 @@ void loop() {
     tft.fillScreen(TFT_BLACK);                  // Fill the screen with black color
     getGPSSpeed();                              // Process GPS Speed Information
   } else {
-    displayNoGPSSignal();
+    displayMessage("No GPS Signal!");
     #ifdef DEBUG
       Serial.println("[DEBUG] No GPS Signal!");
     #endif
@@ -233,10 +202,10 @@ void loop() {
 
   // Check if the boot button is pressed
   if (digitalRead(BOOT_BUTTON_PIN) == LOW) {
-    displayErrorCount(gpsSpeedInvalid);         // Display the error count on the TFT screen
+    displayMessage("Errors: " + gpsSpeedInvalid); // Display the error count on the TFT screen      
     delay(5000);                                // Debounce delay
     tft.fillScreen(TFT_BLACK);                  // Fill the screen with black color
   }
 
-  delay(100);
+  delay(GPS_REFRESH_RATE);
 }
