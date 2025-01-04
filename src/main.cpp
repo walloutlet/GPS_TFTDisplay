@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <Preferences.h>
+#include <LC76G.h>
 #include <TinyGPS++.h>
 #include <TFT_eSPI.h>
 #include <lvgl.h>
@@ -15,11 +16,11 @@ Preferences prefs;
 // Initialize the TFT object
 TFT_eSPI tft = TFT_eSPI();
 
+// Initialize the LC76G GPS hardware
+LC76G lc76g;
+
 // Initialize GPS object
 TinyGPSPlus gps;
-
-// HardwareSerial for GPS
-HardwareSerial gpsSerial(1);
 
 //lvgl draw buffer
 uint32_t draw_buf[DRAW_BUF_SIZE / 4];
@@ -71,7 +72,7 @@ int satBufferIndex = 0;
 bool satBufferFull = false;
 
 // Speed Smoothing variables
-const int numReadings = 3;   // Number of readings to store, default: 5 (smaller = more responsive to changes in speed but jumpy / larger smoother but less responsive)
+const int numReadings = 5;   // Number of readings to store, default: 5 (smaller = more responsive to changes in speed but jumpy / larger smoother but less responsive)
 float readings[numReadings]; // Readings from the analog input
 int readIndex = 0;           // Index of the current reading
 float total = 0;             // Running total
@@ -279,10 +280,6 @@ void processGPSSignalLoss() {
 void saveCoordinates(float lat, float lng) {
   prefs.putFloat("lat", lat);  // Save latitude
   prefs.putFloat("lng", lng);  // Save longitude
-  #ifdef DEBUG
-    Serial.println ("[DEBUG] Saving Coordinates!");
-    delay(5000);
-  #endif
 }
 
 // Function to load latitude and longitude from Preferences
@@ -305,7 +302,7 @@ void display_flush(lv_display_t *disp, const lv_area_t *area, lv_color_t *color_
 
 // Interrupt Service Routine (ISR) for LVGL screen update (Timer 0)
 void IRAM_ATTR lvglISR() {
-  lv_tick_inc(SCREEN_REFRESH_RATE / 1000);  // Convert microseconds to milliseconds and update lvgl tick clock
+  lv_tick_inc(SCREEN_REFRESH_RATE);  // Convert microseconds to milliseconds and update lvgl tick clock
 }
 
 // Interrupt Service Routine (ISR) for GPS data update (Timer 1)
@@ -344,8 +341,19 @@ void setup() {
   tft.setRotation(SCREEN_ROTATION); // Set rotation to 0 degrees
   tft.fillScreen(TFT_BLACK);
 
-  // Initialize GPS Serial
-  gpsSerial.begin(GPS_BAUDRATE, SERIAL_8N1, GPS_RX, GPS_TX);
+  // Initialize the GPS hardware
+  lc76g.begin(GPS_RX, SERIAL_8N1, GPS_TX, GPS_BAUDRATE);
+  if (lc76g.setUpdateRate(GPS_REFRESH_RATE)) {
+    #ifdef DEBUG
+      Serial.println("[DEBUG] Successfully set LC76G GPS update rate to " + String(GPS_REFRESH_RATE) + " ms");
+      delay(5000);
+    #endif
+  } else {
+    #ifdef DEBUG
+      Serial.println("[DEBUG] Failed to set LC76G GPS update rate");
+      delay(5000);
+    #endif
+  }
 
   // Configure the PPS pin as input
   pinMode(GPS_PPS, INPUT);
@@ -356,13 +364,13 @@ void setup() {
   // Initialize the LVGL timer interrupt
   timer0 = timerBegin(0, 80, true); // Timer 0, prescaler 80 (1 MHz), count up
   timerAttachInterrupt(timer0, &lvglISR, true); // Attach the ISR
-  timerAlarmWrite(timer0, SCREEN_REFRESH_RATE, true); // 10 ms interval, auto-reload
+  timerAlarmWrite(timer0, SCREEN_REFRESH_RATE * 1000, true); // 10 ms interval, auto-reload
   timerAlarmEnable(timer0); // Enable the timer
 
   // Initialize the GPS timer interrupt
   timer1 = timerBegin(1, 80, true); // Timer 0, prescaler 80 (1 MHz), count up
   timerAttachInterrupt(timer1, &gpsISR, true); // Attach the ISR
-  timerAlarmWrite(timer1, GPS_REFRESH_RATE, true); // 100 ms interval, auto-reload
+  timerAlarmWrite(timer1, GPS_REFRESH_RATE * 1000, true); // 100 ms interval, auto-reload
   timerAlarmEnable(timer1); // Enable the timer
 
   // Initialize LVGL
@@ -391,8 +399,8 @@ void loop() {
     gpsReady = false; // Reset the flag
 
     // Process GPS data
-    while (gpsSerial.available() > 0) {
-      gps.encode(gpsSerial.read());
+    while (Serial2.available() > 0) {
+      gps.encode(Serial2.read());
     }
 
     // Check if GPS data is valid

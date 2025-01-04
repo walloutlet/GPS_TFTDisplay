@@ -4,8 +4,8 @@
 #define TZ_OFFSET -5
 
 #define GPS_BAUDRATE 115200
-#define GPS_REFRESH_RATE 100000               // Refresh rate of data update, in microseconds, default 100ms
-#define SCREEN_REFRESH_RATE 10000             // Refresh rate of data update, in microseconds, default 10ms
+#define GPS_REFRESH_RATE 100                  // Refresh rate of data update, default 100ms
+#define SCREEN_REFRESH_RATE 10                // Refresh rate of data update, default 10ms
 #define GPS_CLOCK_SYNC 3600                   // System clock GPS time sync intervale, in seconds, default 3600 seconds [1 hour]
 
 #define SCREEN_WIDTH 240
@@ -26,7 +26,7 @@
 #define GPS_PPS  34
 
 // Debug mode configuration
-//#define DEBUG    // Comment this line out to disable debug features
+#define DEBUG    // Comment this line out to disable debug features
 
 // Serial configuration
 #ifdef DEBUG
