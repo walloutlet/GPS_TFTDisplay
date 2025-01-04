@@ -27,10 +27,11 @@
 #define GPS_PPS  34
 
 // ESP32 Boot Button
-#define BOOT_BUTTON_PIN 0
+#define BOOT_BUTTON_PIN  0
+#define DEBOUNCE_TIME    200
 
 // Debug mode configuration
-#define DEBUG    // Comment this line out to disable debug features
+// #define DEBUG    // Comment this line out to disable debug features
 
 // Serial configuration
 #ifdef DEBUG

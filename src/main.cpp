@@ -79,6 +79,9 @@ int readIndex = 0;            // Index of the current reading
 float total = 0;              // Running total
 float average = 0;            // The average
 
+// Variable to store the last time the button was pressed
+unsigned long lastDebounceTime = 0;
+
 // Timer interrupt variables
 hw_timer_t *timer0 = NULL;
 hw_timer_t *timer1 = NULL;
@@ -192,13 +195,16 @@ void updateSatChart() {
 }
 
 void checkBootButton() {
-  if (!digitalRead(BOOT_BUTTON_PIN)) {
+  // Check if the button is pressed (LOW) and if enough time has passed since the last press
+  if (digitalRead(BOOT_BUTTON_PIN) == LOW && (millis() - lastDebounceTime) > DEBOUNCE_TIME) {
+    // Update the last debounce time
+    lastDebounceTime = millis();
+
     // Toggle the enableSmoothing flag
     enableSmoothing = !enableSmoothing;
-    if(enableSmoothing){
+    if (enableSmoothing) {
       lv_obj_remove_flag(ui_SmoothingLabel, LV_OBJ_FLAG_HIDDEN);
-    }
-    else {
+    } else {
       lv_obj_add_flag(ui_SmoothingLabel, LV_OBJ_FLAG_HIDDEN);
     }
 
