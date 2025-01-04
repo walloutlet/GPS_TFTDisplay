@@ -460,7 +460,7 @@ void loop() {
     static char bufSats[4];
     std::snprintf(bufSats, sizeof(bufSats), "%02d", currentSats);
     lv_label_set_text(ui_SatNum, bufSats);
-    updateSatChart();
+//    updateSatChart();
   }
 
   if (newSpeedAvailable) {
@@ -468,7 +468,7 @@ void loop() {
     static char bufSpeed[4];
     std::snprintf(bufSpeed, sizeof(bufSpeed), "%03d", (int)currentSpeed);
     lv_label_set_text(ui_SpeedNum, bufSpeed);
-    updateSpeedChart();
+//    updateSpeedChart();
   }
 
   if (newHeadingAvailable){
@@ -483,11 +483,11 @@ void loop() {
     saveCoordinates(currentLat, currentLng);   // Save the current coordinates to Preferences
   }
 
-/*
+
   if (ppsTriggered) {
     updateSatChart();
     updateSpeedChart();
     ppsTriggered = false;
   }
-*/
+
 }
