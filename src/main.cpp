@@ -6,6 +6,7 @@
 #include <lvgl.h>
 #include <ui.h>
 #include "config.h"
+#include "ESP32CPUMonitor.h"
 
 // Define the LVGL screen buffer size
 #define DRAW_BUF_SIZE (SCREEN_WIDTH * SCREEN_HEIGHT / 10 * (LV_COLOR_DEPTH / 16))
@@ -16,11 +17,14 @@ Preferences prefs;
 // Initialize the TFT object
 TFT_eSPI tft = TFT_eSPI();
 
-// Initialize the LC76G GPS hardware
+// Initialize the LC76G GPS hardware object
 LC76G lc76g;
 
 // Initialize GPS object
 TinyGPSPlus gps;
+
+// Intialize the CPU Monitoring object, run every 1 second, do not print stats to Serial Monitor
+ESP32CPUMonitor cpuMonitor(1000, false);
 
 //lvgl draw buffer
 uint32_t draw_buf[DRAW_BUF_SIZE / 4];
@@ -60,7 +64,7 @@ char sysDateBuffer[11]; // YYYY/MM/DD + null terminator
 char sysTimeBuffer[9];  // HH:MM:SS + null terminator
 
 // Speed Smoothing variables
-bool enableSmoothing = true;  // Flag to enable or disable smoothing
+bool enableSmoothing = false; // Flag to enable or disable smoothing
 const int numReadings = 5;    // Number of readings to store, default: 5 (smaller = more responsive to changes in speed but jumpy / larger smoother but less responsive)
 float readings[numReadings];  // Readings from the analog input
 int readIndex = 0;            // Index of the current reading
@@ -71,7 +75,7 @@ float average = 0;            // The average
 unsigned long lastDebounceTime = 0;
 
 // Timer interrupt variables
-hw_timer_t *timer0 = NULL;
+// hw_timer_t *timer0 = NULL;
 hw_timer_t *timer1 = NULL;
 
 void processSatNum(void) {
@@ -283,9 +287,9 @@ void display_flush(lv_display_t *disp, const lv_area_t *area, lv_color_t *color_
 }
 
 // Interrupt Service Routine (ISR) for LVGL screen update (Timer 0)
-void IRAM_ATTR lvglISR() {
-  lv_tick_inc(SCREEN_REFRESH_RATE);  // Convert microseconds to milliseconds and update lvgl tick clock
-}
+// void IRAM_ATTR lvglISR() {
+//   lv_tick_inc(SCREEN_REFRESH_RATE);  // Convert microseconds to milliseconds and update lvgl tick clock
+// }
 
 // Interrupt Service Routine (ISR) for GPS data update (Timer 1)
 void IRAM_ATTR gpsISR() {
@@ -303,6 +307,9 @@ void setup() {
     // Initialize Serial for debugging
     Serial.begin(SERIAL_BAUDRATE);
   #endif
+
+  // Initialize CPU Monitor
+  cpuMonitor.begin();
 
   // Initialize Preferences
   prefs.begin("gps_data", false);  // Open the "gps_data" namespace in read/write mode
@@ -347,10 +354,10 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(GPS_PPS), ppsISR, RISING);
 
   // Initialize the LVGL timer interrupt
-  timer0 = timerBegin(0, 80, true); // Timer 0, prescaler 80 (1 MHz), count up
-  timerAttachInterrupt(timer0, &lvglISR, true); // Attach the ISR
-  timerAlarmWrite(timer0, SCREEN_REFRESH_RATE * 1000, true); // 10 ms interval, auto-reload
-  timerAlarmEnable(timer0); // Enable the timer
+//  timer0 = timerBegin(0, 80, true); // Timer 0, prescaler 80 (1 MHz), count up
+//  timerAttachInterrupt(timer0, &lvglISR, true); // Attach the ISR
+//  timerAlarmWrite(timer0, SCREEN_REFRESH_RATE * 1000, true); // 10 ms interval, auto-reload
+//  timerAlarmEnable(timer0); // Enable the timer
 
   // Initialize the GPS timer interrupt
   timer1 = timerBegin(1, 80, true); // Timer 0, prescaler 80 (1 MHz), count up
@@ -360,6 +367,9 @@ void setup() {
 
   // Initialize LVGL
   lv_init();
+
+  // Callback function for LVGL version >9.0 instead of using lv_tick_inc timer interrupt above
+  lv_tick_set_cb((lv_tick_get_cb_t)millis);
 
   lv_display_t * disp;
   disp = lv_tft_espi_create(SCREEN_WIDTH, SCREEN_HEIGHT, draw_buf, sizeof(draw_buf));
@@ -376,6 +386,9 @@ void setup() {
 }
 
 void loop() {
+  // Update CPU statistics
+  cpuMonitor.update();
+
   // Run the LVGL GUI
   lv_timer_handler();
 
@@ -411,6 +424,7 @@ void loop() {
         gpsSignalAcquired = false;
         processGPSSignalLoss();
     }
+
   #ifdef DEBUG
     if (gpsSignalAcquired && sysClockSet) {
       Serial.print("[DEBUG] ");
@@ -469,10 +483,16 @@ void loop() {
     saveCoordinates(currentLat, currentLng);   // Save the current coordinates to Preferences
   }
 
-
+  // Update specific values on display after every GPS PPS signal received (Once per second)
   if (ppsTriggered) {
     lv_chart_set_next_value(ui_SpeedChart, ui_SpeedChart_series_1, (int)currentSpeed);
     lv_chart_set_next_value(ui_SpeedChart, ui_SpeedChart_series_2, (int)currentSats);
+  
+    float cpuUtil = cpuMonitor.getCPUUsage();
+    char cpuUtilStr[16];
+    snprintf(cpuUtilStr, sizeof(cpuUtilStr), "%d", cpuUtil);
+    lv_label_set_text(ui_cpuUtil, cpuUtilStr);
+  
     ppsTriggered = false;
   }
 

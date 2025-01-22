@@ -243,7 +243,51 @@ void ui_Speedo_screen_init(void)
     lv_obj_set_y(ui_SmoothingLabel, -27);
     lv_obj_set_align(ui_SmoothingLabel, LV_ALIGN_CENTER);
     lv_label_set_text(ui_SmoothingLabel, "Smoothing");
+    lv_obj_remove_flag(ui_SmoothingLabel,
+                       LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE |
+                       LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
+                       LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
     lv_obj_set_style_text_font(ui_SmoothingLabel, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_flag(ui_SmoothingLabel, LV_OBJ_FLAG_HIDDEN);
+
+    ui_CPU = lv_label_create(ui_Speedo);
+    lv_obj_set_width(ui_CPU, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_CPU, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_CPU, 64);
+    lv_obj_set_y(ui_CPU, 68);
+    lv_obj_set_align(ui_CPU, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_CPU, "CPU %");
+    lv_obj_remove_flag(ui_CPU, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
+                       LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
+                       LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
+    lv_obj_set_style_text_font(ui_CPU, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_cpuUtilBackground = lv_label_create(ui_Speedo);
+    lv_obj_set_width(ui_cpuUtilBackground, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_cpuUtilBackground, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_cpuUtilBackground, 62);
+    lv_obj_set_y(ui_cpuUtilBackground, 80);
+    lv_obj_set_align(ui_cpuUtilBackground, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_cpuUtilBackground, "888");
+    lv_obj_remove_flag(ui_cpuUtilBackground,
+                       LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE |
+                       LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
+                       LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
+    lv_obj_set_style_text_color(ui_cpuUtilBackground, lv_color_hex(0x363636), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_cpuUtilBackground, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_cpuUtilBackground, &ui_font_Digital_Mono_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_cpuUtil = lv_label_create(ui_Speedo);
+    lv_obj_set_width(ui_cpuUtil, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_cpuUtil, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_cpuUtil, 62);
+    lv_obj_set_y(ui_cpuUtil, 80);
+    lv_obj_set_align(ui_cpuUtil, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_cpuUtil, "---");
+    lv_obj_remove_flag(ui_cpuUtil, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
+                       LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
+                       LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
+    lv_obj_set_style_text_font(ui_cpuUtil, &ui_font_Digital_Mono_16, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 
 }

@@ -55,7 +55,8 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "main cpp": "cpp",
-        "bitset": "cpp"
+        "bitset": "cpp",
+        "iostream": "cpp"
     },
     "cmake.ignoreCMakeListsMissing": true
 }

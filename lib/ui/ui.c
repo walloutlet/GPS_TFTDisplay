@@ -28,6 +28,9 @@ lv_obj_t * ui_SpeedChart_Xaxis;
 lv_obj_t * ui_SpeedChart_Yaxis1;
 lv_obj_t * ui_SpeedChart_Yaxis2;
 lv_obj_t * ui_SmoothingLabel;
+lv_obj_t * ui_CPU;
+lv_obj_t * ui_cpuUtilBackground;
+lv_obj_t * ui_cpuUtil;
 lv_chart_series_t * ui_SpeedChart_series_1;
 lv_chart_series_t * ui_SpeedChart_series_2;
 // CUSTOM VARIABLES
