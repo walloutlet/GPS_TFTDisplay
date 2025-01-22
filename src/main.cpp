@@ -75,7 +75,6 @@ float average = 0;            // The average
 unsigned long lastDebounceTime = 0;
 
 // Timer interrupt variables
-// hw_timer_t *timer0 = NULL;
 hw_timer_t *timer1 = NULL;
 
 void processSatNum(void) {
@@ -286,11 +285,6 @@ void display_flush(lv_display_t *disp, const lv_area_t *area, lv_color_t *color_
   lv_display_flush_ready(disp);
 }
 
-// Interrupt Service Routine (ISR) for LVGL screen update (Timer 0)
-// void IRAM_ATTR lvglISR() {
-//   lv_tick_inc(SCREEN_REFRESH_RATE);  // Convert microseconds to milliseconds and update lvgl tick clock
-// }
-
 // Interrupt Service Routine (ISR) for GPS data update (Timer 1)
 void IRAM_ATTR gpsISR() {
   gpsReady = true;
@@ -352,12 +346,6 @@ void setup() {
 
   // Attach the interrupt to the PPS pin
   attachInterrupt(digitalPinToInterrupt(GPS_PPS), ppsISR, RISING);
-
-  // Initialize the LVGL timer interrupt
-//  timer0 = timerBegin(0, 80, true); // Timer 0, prescaler 80 (1 MHz), count up
-//  timerAttachInterrupt(timer0, &lvglISR, true); // Attach the ISR
-//  timerAlarmWrite(timer0, SCREEN_REFRESH_RATE * 1000, true); // 10 ms interval, auto-reload
-//  timerAlarmEnable(timer0); // Enable the timer
 
   // Initialize the GPS timer interrupt
   timer1 = timerBegin(1, 80, true); // Timer 0, prescaler 80 (1 MHz), count up

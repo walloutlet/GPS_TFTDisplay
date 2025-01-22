@@ -7,7 +7,6 @@
 #define GPS_REFRESH_RATE    100              // Refresh rate of data update, default 100ms
 #define GPS_CLOCK_SYNC      3600             // System clock GPS time sync intervale, in seconds, default 3600 seconds [1 hour]
 
-#define SCREEN_REFRESH_RATE 10               // Refresh rate of data update, default 10ms
 #define SCREEN_WIDTH        240
 #define SCREEN_HEIGHT       240
 #define SCREEN_ROTATION     1                // Screen rotation; 0 = 0 degrees, 1 = 90 degrees, 2 = 180 degrees, 3 = 270 degrees
