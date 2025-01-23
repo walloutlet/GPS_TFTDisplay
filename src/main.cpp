@@ -24,7 +24,11 @@ LC76G lc76g;
 TinyGPSPlus gps;
 
 // Intialize the CPU Monitoring object, run every 1 second, do not print stats to Serial Monitor
-ESP32CPUMonitor cpuMonitor(1000, false);
+#ifdef DEBUG
+  ESP32CPUMonitor cpuMonitor(1000, true);
+#else
+  ESP32CPUMonitor cpuMonitor(1000, false);
+#endif
 
 //lvgl draw buffer
 uint32_t draw_buf[DRAW_BUF_SIZE / 4];
@@ -375,7 +379,7 @@ void setup() {
 
 void loop() {
   // Update CPU statistics
-  cpuMonitor.update();
+//  cpuMonitor.update();
 
   // Run the LVGL GUI
   lv_timer_handler();
@@ -473,15 +477,18 @@ void loop() {
 
   // Update specific values on display after every GPS PPS signal received (Once per second)
   if (ppsTriggered) {
+    ppsTriggered = false;
+
     lv_chart_set_next_value(ui_SpeedChart, ui_SpeedChart_series_1, (int)currentSpeed);
     lv_chart_set_next_value(ui_SpeedChart, ui_SpeedChart_series_2, (int)currentSats);
-  
-    float cpuUtil = cpuMonitor.getCPUUsage();
+    
+    extern float get_cpu_usage();
+    float currentCpuUsage = get_cpu_usage();
+//    float currentCpuUsage = cpuMonitor.getCPUUsage();
     char cpuUtilStr[16];
-    snprintf(cpuUtilStr, sizeof(cpuUtilStr), "%d", cpuUtil);
+    std::snprintf(cpuUtilStr, sizeof(cpuUtilStr), "%.0f", std::round(currentCpuUsage));
     lv_label_set_text(ui_cpuUtil, cpuUtilStr);
-  
-    ppsTriggered = false;
+    lv_chart_set_next_value(ui_SpeedChart, ui_SpeedChart_series_3, (int)currentCpuUsage);
   }
 
 }

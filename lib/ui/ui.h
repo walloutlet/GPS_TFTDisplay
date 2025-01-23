@@ -49,6 +49,7 @@ extern lv_obj_t * ui_cpuUtilBackground;
 extern lv_obj_t * ui_cpuUtil;
 extern lv_chart_series_t * ui_SpeedChart_series_1;
 extern lv_chart_series_t * ui_SpeedChart_series_2;
+extern lv_chart_series_t * ui_SpeedChart_series_3;
 // CUSTOM VARIABLES
 
 // EVENTS

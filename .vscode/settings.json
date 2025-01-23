@@ -56,7 +56,8 @@
         "typeinfo": "cpp",
         "main cpp": "cpp",
         "bitset": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "regex": "cpp"
     },
     "cmake.ignoreCMakeListsMissing": true
 }

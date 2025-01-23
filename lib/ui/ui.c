@@ -33,6 +33,7 @@ lv_obj_t * ui_cpuUtilBackground;
 lv_obj_t * ui_cpuUtil;
 lv_chart_series_t * ui_SpeedChart_series_1;
 lv_chart_series_t * ui_SpeedChart_series_2;
+lv_chart_series_t * ui_SpeedChart_series_3;
 // CUSTOM VARIABLES
 
 // EVENTS

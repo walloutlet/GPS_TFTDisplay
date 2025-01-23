@@ -1,20 +1,18 @@
 #include <Arduino.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "esp_system.h"
-#include "esp_timer.h"
 
 class ESP32CPUMonitor {
 private:
     uint32_t lastPrintTime = 0;
     const uint32_t printInterval;  // Interval in milliseconds
-    
-    // Statistics tracking
-    uint64_t lastIdleTime = 0;
-    float cpuUsage = 0;
-
-    // Flag to enable/disable printing stats
     bool enablePrintStats;
+    
+    // Variables for CPU usage calculation
+    uint32_t lastMeasurementTime = 0;
+    uint32_t busyTime = 0;
+    uint32_t measurementStartTime = 0;
+    float cpuUsage = 0;
+    const uint32_t sampleInterval = 100; // Sample every 100ms
+    bool isSampling = false;
 
     // Helper function to get task high water mark
     uint32_t getTaskHighWaterMark(TaskHandle_t task) {
@@ -27,16 +25,47 @@ public:
 
     void begin() {
         lastPrintTime = millis();
-        lastIdleTime = esp_timer_get_time();
+        lastMeasurementTime = millis();
+        measurementStartTime = millis();
     }
 
     void update() {
-        if (millis() - lastPrintTime >= printInterval) {
-            calculateCPUUsage();
+        uint32_t currentTime = millis();
+        
+        // Start a new measurement cycle
+        if (!isSampling && (currentTime - lastMeasurementTime >= sampleInterval)) {
+            measurementStartTime = currentTime;
+            busyTime = 0;
+            isSampling = true;
+            lastMeasurementTime = currentTime;
+        }
+        
+        // If we're in a sampling period, count busy time
+        if (isSampling) {
+            busyTime++;
+            
+            // End sampling period after sampleInterval
+            if (currentTime - measurementStartTime >= sampleInterval) {
+                // Calculate CPU usage as percentage of busy time
+                float newUsage = (float)busyTime / (float)(currentTime - measurementStartTime) * 100.0f;
+                
+                // Smooth the measurements with a simple moving average
+                cpuUsage = (cpuUsage * 0.7f) + (newUsage * 0.3f);
+                
+                // Clamp CPU usage to valid range
+                if (cpuUsage < 0.0f) cpuUsage = 0.0f;
+                if (cpuUsage > 100.0f) cpuUsage = 100.0f;
+                
+                isSampling = false;
+            }
+        }
+
+        // Print stats if interval has elapsed
+        if (currentTime - lastPrintTime >= printInterval) {
             if (enablePrintStats) {
                 printStats();
             }
-            lastPrintTime = millis();
+            lastPrintTime = currentTime;
         }
     }
 
@@ -45,36 +74,12 @@ public:
     }
 
 private:
-    void calculateCPUUsage() {
-        uint64_t currentIdleTime = esp_timer_get_time();
-        
-        if (lastIdleTime > 0) {
-            uint64_t totalTime = printInterval * 1000;  // Convert to microseconds
-            uint64_t idleTimeDelta = currentIdleTime - lastIdleTime;
-            
-            if (totalTime > 0) {
-                // Calculate CPU usage as percentage of non-idle time
-                cpuUsage = 100.0f - ((float)idleTimeDelta * 100.0f / (float)totalTime);
-                
-                // Clamp CPU usage to valid range
-                if (cpuUsage < 0.0f) cpuUsage = 0.0f;
-                if (cpuUsage > 100.0f) cpuUsage = 100.0f;
-            }
-        }
-
-        lastIdleTime = currentIdleTime;
-    }
-
     void printStats() {
         Serial.println("\n===== ESP32 CPU Statistics =====");
         Serial.printf("CPU Usage: %.2f%%\n", cpuUsage);
         Serial.printf("CPU Frequency: %dMHz\n", ESP.getCpuFreqMHz());
         Serial.printf("Free Heap: %d bytes\n", ESP.getFreeHeap());
         Serial.printf("Minimum Free Heap: %d bytes\n", ESP.getMinFreeHeap());
-        Serial.printf("Max Alloc Heap: %d bytes\n", ESP.getMaxAllocHeap());
-        
-        // Print information about key tasks
-        Serial.println("\nTask Stack Info (Free Stack Space):");
         Serial.println("===============================================");
         
         // Get information about currently running tasks

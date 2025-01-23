@@ -229,6 +229,10 @@ void ui_Speedo_screen_init(void)
                                                                      LV_CHART_AXIS_SECONDARY_Y);
     static lv_coord_t ui_SpeedChart_series_2_array[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     lv_chart_set_ext_y_array(ui_SpeedChart, ui_SpeedChart_series_2, ui_SpeedChart_series_2_array);
+    ui_SpeedChart_series_3 = lv_chart_add_series(ui_SpeedChart, lv_color_hex(0xFF0000),
+                                                                     LV_CHART_AXIS_SECONDARY_Y);
+    static lv_coord_t ui_SpeedChart_series_3_array[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    lv_chart_set_ext_y_array(ui_SpeedChart, ui_SpeedChart_series_3, ui_SpeedChart_series_3_array);
 
     lv_obj_set_style_size(ui_SpeedChart, 0, 0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 
@@ -243,12 +247,12 @@ void ui_Speedo_screen_init(void)
     lv_obj_set_y(ui_SmoothingLabel, -27);
     lv_obj_set_align(ui_SmoothingLabel, LV_ALIGN_CENTER);
     lv_label_set_text(ui_SmoothingLabel, "Smoothing");
+    lv_obj_add_flag(ui_SmoothingLabel, LV_OBJ_FLAG_HIDDEN);     /// Flags
     lv_obj_remove_flag(ui_SmoothingLabel,
                        LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE |
                        LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
                        LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
     lv_obj_set_style_text_font(ui_SmoothingLabel, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_add_flag(ui_SmoothingLabel, LV_OBJ_FLAG_HIDDEN);
 
     ui_CPU = lv_label_create(ui_Speedo);
     lv_obj_set_width(ui_CPU, LV_SIZE_CONTENT);   /// 1
